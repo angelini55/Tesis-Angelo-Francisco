@@ -1,5 +1,5 @@
 from tkinter import *
-from Frenos_tambor_zapata_interna_energizante_V3 import Application
+from Frenos_tambor_zapata_interna import ZapataInternaWindow
 
 
 class Seleccion(Frame):
@@ -14,7 +14,7 @@ class Seleccion(Frame):
 
         def menu1():
             taro = Toplevel()
-            Application(taro)
+            ZapataInternaWindow(taro)
 
         self.btn1 = Button(self, text="Frenos y embragues de tambor con zapata interna expansible", height=5,  command=menu1)
         self.btn2 = Button(self, text="Frenos y embragues de tambor con zapatas exteriores contractiles",height=5)
