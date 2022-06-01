@@ -85,8 +85,9 @@ class TablaMaterialesSI(Frame):
         def set_mawp():
             mawp = self.txttabla.get()
             self.parent.txt18.insert(0, mawp)
-            self.master.destroy()
-            return mawp
+            if mawp:
+                self.master.destroy()
+                return mawp
 
         self.submit = Button(self, text="Insertar", command=set_mawp)
         self.submit.place(x=160, y=450)
