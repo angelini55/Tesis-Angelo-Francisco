@@ -1,12 +1,13 @@
 from tkinter import *
-from tkinter import messagebox; PhotoImage
+from tkinter import messagebox
+from tkinter.ttk import Combobox; PhotoImage; Combobox
 from math import *
 from PIL import ImageTk, Image
 
 class Application(Frame):
 
     def __init__(self, master=None):
-        super().__init__(master, width=1000, height=800)
+        super().__init__(master, width=800, height=700)
         self.master = master
         self.pack()
         self.create_widget()
@@ -68,28 +69,44 @@ class Application(Frame):
         self.txt13.insert(0,Ry)
     
     def ayuda(self):
+        self.mensaje = """F: fuerza de accionamiento
+µ: Coeficiente de friccion
+a: Distancia desde el pivote hasta el centro del tambor
+c: Distancia desde el pto de aplicacion de la fuerza hasta el centro del pivote "c" 
+D: Diametro del tambor
+b: Ancho de la zapata
+Θ1: Angulo inicial material de friccion
+Θ2: Angulo final material de friccion
+Θa: Angulo de presion maxima
+Fx: Componente en x de la fuerza
+Fy: Componente en y de la fuerza
+Rx: Reaccion del pasador en el eje x
+Ry: Reaccion del pasador en el eje y
+T: Torque de frenado
+Padm: Presion maxima admisible
+FD: Factor de diseño"""
 
-        messagebox.showinfo(title="ayuda", message="xd")
+        messagebox.showinfo(title="Ayuda", message=self.mensaje)
 
 
     def create_widget(self):
 
-        self.lbl1 = Label(self,text='Fuerza de accionamiento"F"')
-        self.lbl2 = Label(self,text='Coeficiente de friccion"µ"')
-        self.lbl3 = Label(self,text='Distancia desde el pivote hasta el centro del tambor "a"')
-        self.lbl4 = Label(self,text='Distancia desde el pto de aplicacion de la fuerza hasta el centro del pivote "c"')
-        self.lbl5 = Label(self,text='Diametro del tambor')
-        self.lbl6 = Label(self,text='Ancho de la zapata "b"')
-        self.lbl7 = Label(self,text='Angulo inicial material de friccion "Θ1"')
-        self.lbl8 = Label(self,text='Angulo final material de friccion "Θ2"')
-        self.lbl9 = Label(self,text='Angulo de presion maxima "Θa"')
-        self.lbl10 = Label(self,text='Componente en x de la fuerza "Fx"')
-        self.lbl11 = Label(self,text='Componente en y de la fuerza "Fy"')
-        self.lbl12 = Label(self,text='Reaccion del pasador en el eje x "Rx"')
-        self.lbl13 = Label(self,text='Reaccion del pasador en el eje y "Ry"')
-        self.lbl14 = Label(self,text='Torque de frenado "T"')
-        self.lbl15 = Label(self,text='Presion maxima admisible "Padm"')
-        self.lbl16 = Label(self,text='Factor de diseño "FD""')
+        self.lbl1 = Label(self,text='F')
+        self.lbl2 = Label(self,text='µ')
+        self.lbl3 = Label(self,text='a')
+        self.lbl4 = Label(self,text='c')
+        self.lbl5 = Label(self,text='D')
+        self.lbl6 = Label(self,text='b')
+        self.lbl7 = Label(self,text='Θ1')
+        self.lbl8 = Label(self,text='Θ2')
+        self.lbl9 = Label(self,text='Θa')
+        self.lbl10 = Label(self,text='Fx')
+        self.lbl11 = Label(self,text='Fy')
+        self.lbl12 = Label(self,text='Rx')
+        self.lbl13 = Label(self,text='Ry')
+        self.lbl14 = Label(self,text='T')
+        self.lbl15 = Label(self,text='Padm')
+        self.lbl16 = Label(self,text='FD')
 
         self.txt1 = Entry(self)
         self.txt2 = Entry(self)
@@ -113,6 +130,9 @@ class Application(Frame):
         self.radio1 = Radiobutton(self, text="autoenergizante", variable=self.seleccion, value=1)
         self.radio2 = Radiobutton(self, text="autodesenergizante", variable=self.seleccion, value=2)
 
+        self.opciones = ["Dada F, hallar T y PD", "Dada T, hallar F y PD", "Dada PD, hallar F y T"]
+        self.list = Combobox(self, width=25, values=self.opciones, state="readonly" )
+
         self.btn = Button(self, text='Solve', command = self.operaciones)
         self.btn2 = Button(self, text='?', command = self.ayuda)
 
@@ -121,51 +141,53 @@ class Application(Frame):
         self.img = ImageTk.PhotoImage(self.image)
         self.lbl17 = Label(self, image=self.img)
 
-        self.lbl1.place(x=10, y=70, width=210, height=20)
-        self.lbl2.place(x=10, y=100, width=210, height=20)
-        self.lbl3.place(x=10, y=130, width=210, height=20)
-        self.lbl4.place(x=10, y=160, width=210, height=20)
-        self.lbl5.place(x=10, y=190, width=210, height=20)
-        self.lbl6.place(x=10, y=220, width=210, height=20)
-        self.lbl7.place(x=10, y=250, width=210, height=20)
-        self.lbl8.place(x=10, y=280, width=210, height=20)
-        self.lbl9.place(x=10, y=310, width=210, height=20)
-        self.lbl10.place(x=10, y=340, width=210, height=20)
-        self.lbl11.place(x=10, y=370, width=210, height=20)
-        self.lbl12.place(x=10, y=540, width=210, height=20)
-        self.lbl13.place(x=10, y=570, width=210, height=20)
-        self.lbl14.place(x=10, y=600, width=210, height=20)
-        self.lbl15.place(x=10, y=630, width=210, height=20)
-        self.lbl16.place(x=10, y=660, width=210, height=20)
-        self.lbl17.place(x=500, y=10, width=400, height=400)
+        self.lbl1.place(x=10, y=70, width=50, height=20)
+        self.lbl2.place(x=10, y=100, width=50, height=20)
+        self.lbl3.place(x=10, y=130, width=50, height=20)
+        self.lbl4.place(x=10, y=160, width=50, height=20)
+        self.lbl5.place(x=10, y=190, width=50, height=20)
+        self.lbl6.place(x=10, y=220, width=50, height=20)
+        self.lbl7.place(x=10, y=250, width=50, height=20)
+        self.lbl8.place(x=10, y=280, width=50, height=20)
+        self.lbl9.place(x=10, y=310, width=50, height=20)
+        self.lbl10.place(x=10, y=340, width=50, height=20)
+        self.lbl11.place(x=10, y=370, width=50, height=20)
+        self.lbl12.place(x=10, y=540, width=50, height=20)
+        self.lbl13.place(x=10, y=570, width=50, height=20)
+        self.lbl14.place(x=10, y=600, width=50, height=20)
+        self.lbl15.place(x=10, y=630, width=50, height=20)
+        self.lbl16.place(x=10, y=660, width=50, height=20)
+        self.lbl17.place(x=400, y=10, width=400, height=400)
         
 
-        self.txt1.place(x=220, y=70, width=210, height=20)
-        self.txt2.place(x=220, y=100, width=210, height=20)
-        self.txt3.place(x=220, y=130, width=210, height=20)
-        self.txt4.place(x=220, y=160, width=210, height=20)
-        self.txt5.place(x=220, y=190, width=210, height=20)
-        self.txt6.place(x=220, y=220, width=210, height=20)
-        self.txt7.place(x=220, y=250, width=210, height=20)
-        self.txt8.place(x=220, y=280, width=210, height=20)
-        self.txt9.place(x=220, y=310, width=210, height=20)
-        self.txt10.place(x=220, y=340, width=210, height=20)
-        self.txt11.place(x=220, y=370, width=210, height=20)
-        self.txt12.place(x=220, y=540, width=210, height=20)
-        self.txt13.place(x=220, y=570, width=210, height=20)
-        self.txt14.place(x=220, y=600, width=210, height=20)
-        self.txt15.place(x=220, y=630, width=210, height=20)
-        self.txt16.place(x=220, y=660, width=210, height=20)
+        self.txt1.place(x=70, y=70, width=80, height=20)
+        self.txt2.place(x=70, y=100, width=80, height=20)
+        self.txt3.place(x=70, y=130, width=80, height=20)
+        self.txt4.place(x=70, y=160, width=80, height=20)
+        self.txt5.place(x=70, y=190, width=80, height=20)
+        self.txt6.place(x=70, y=220, width=80, height=20)
+        self.txt7.place(x=70, y=250, width=80, height=20)
+        self.txt8.place(x=70, y=280, width=80, height=20)
+        self.txt9.place(x=70, y=310, width=80, height=20)
+        self.txt10.place(x=70, y=340, width=80, height=20)
+        self.txt11.place(x=70, y=370, width=80, height=20)
+        self.txt12.place(x=70, y=540, width=80, height=20)
+        self.txt13.place(x=70, y=570, width=80, height=20)
+        self.txt14.place(x=70, y=600, width=80, height=20)
+        self.txt15.place(x=70, y=630, width=80, height=20)
+        self.txt16.place(x=70, y=660, width=80, height=20)
 
-        self.btn.place(x=630, y=450, width=150, height=100)
-        self.btn2.place(x=330, y=10, width=40, height=40)
+        self.btn.place(x=500, y=450, width=150, height=100)
+        self.btn2.place(x=280, y=10, width=40, height=40)
         
         self.radio1.place(x=130, y=10,)
         self.radio2.place(x=130, y=30,)
 
+        self.list.place(x=30, y=400)        
 
 
-root = Tk()
-root.wm_title("Frenos de tambor con zapata interna")
-app = Application(root)
-app.mainloop()
+
+if __name__ == "__main__":
+    root = Tk()
+    root.wm_title("Frenos de tambor con zapata interna")
+    Application(root).mainloop()
