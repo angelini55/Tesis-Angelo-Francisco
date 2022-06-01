@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import messagebox; PhotoImage
 from math import *
 from PIL import ImageTk, Image
-from Frenos_tambor_zapata_interna_energizante_V3 import Application
+from Frenos_tambor_zapata_interna import ZapataInternaWindow
 from Menu_de_seleccion import Seleccion
 
 
