@@ -1,6 +1,7 @@
 from tkinter import *
+from tkinter import messagebox; PhotoImage
 from math import *
-from sympy import *
+from PIL import ImageTk, Image
 
 class Application(Frame):
 
@@ -65,6 +66,10 @@ class Application(Frame):
         self.txt12.insert(0,Rx)
         self.txt13.delete(0,"end")
         self.txt13.insert(0,Ry)
+    
+    def ayuda(self):
+
+        messagebox.showinfo(title="ayuda", message="xd")
 
 
     def create_widget(self):
@@ -72,7 +77,7 @@ class Application(Frame):
         self.lbl1 = Label(self,text='Fuerza de accionamiento"F"')
         self.lbl2 = Label(self,text='Coeficiente de friccion"µ"')
         self.lbl3 = Label(self,text='Distancia desde el pivote hasta el centro del tambor "a"')
-        self.lbl4 = Label(self,text='Distancia desde el pto de aplicacion de la fuerza hasta el centro del 3.14vote "c"')
+        self.lbl4 = Label(self,text='Distancia desde el pto de aplicacion de la fuerza hasta el centro del pivote "c"')
         self.lbl5 = Label(self,text='Diametro del tambor')
         self.lbl6 = Label(self,text='Ancho de la zapata "b"')
         self.lbl7 = Label(self,text='Angulo inicial material de friccion "Θ1"')
@@ -109,6 +114,12 @@ class Application(Frame):
         self.radio2 = Radiobutton(self, text="autodesenergizante", variable=self.seleccion, value=2)
 
         self.btn = Button(self, text='Solve', command = self.operaciones)
+        self.btn2 = Button(self, text='?', command = self.ayuda)
+
+        self.image = Image.open("C:\\Users\\angel\\Desktop\\Codigo_python\\Freno.png")
+        self.image = self.image.resize((400,400), Image.ANTIALIAS)
+        self.img = ImageTk.PhotoImage(self.image)
+        self.lbl17 = Label(self, image=self.img)
 
         self.lbl1.place(x=10, y=70, width=210, height=20)
         self.lbl2.place(x=10, y=100, width=210, height=20)
@@ -126,6 +137,8 @@ class Application(Frame):
         self.lbl14.place(x=10, y=600, width=210, height=20)
         self.lbl15.place(x=10, y=630, width=210, height=20)
         self.lbl16.place(x=10, y=660, width=210, height=20)
+        self.lbl17.place(x=500, y=10, width=400, height=400)
+        
 
         self.txt1.place(x=220, y=70, width=210, height=20)
         self.txt2.place(x=220, y=100, width=210, height=20)
@@ -144,7 +157,8 @@ class Application(Frame):
         self.txt15.place(x=220, y=630, width=210, height=20)
         self.txt16.place(x=220, y=660, width=210, height=20)
 
-        self.btn.place(x=500, y=85, width=210, height=100)
+        self.btn.place(x=630, y=450, width=150, height=100)
+        self.btn2.place(x=330, y=10, width=40, height=40)
         
         self.radio1.place(x=130, y=10,)
         self.radio2.place(x=130, y=30,)
