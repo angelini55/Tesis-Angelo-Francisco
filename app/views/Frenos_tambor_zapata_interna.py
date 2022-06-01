@@ -5,7 +5,7 @@ from tkinter import messagebox
 from tkinter.ttk import Combobox; PhotoImage; Combobox
 from math import *
 from PIL import ImageTk, Image
-from TablaMaterialesFriccionSI import TablaMaterialesSI
+from .TablaMaterialesFriccionSI import TablaMaterialesSI
 
 class ZapataInternaWindow(Frame):
 
@@ -17,7 +17,8 @@ class ZapataInternaWindow(Frame):
 
     def tablaSI(self):
         tabla = Toplevel()
-        TablaMaterialesSI(tabla) 
+        self.table = TablaMaterialesSI(master=tabla, parent=self)
+        
 
     def operacionesT(self):
         a1 = float(self.txt1.get())
@@ -286,8 +287,8 @@ FD: Factor de diseño"""
         self.btn2 = Button(self, text='?', command = self.ayuda)
         self.btn3 = Button(self, text='tabla', command=self.tablaSI)
 
-        self.base_path = pathlib.Path(__file__).parent.resolve()
-        self.image_filename = 'Freno.png'
+        self.base_path = pathlib.Path(__file__).parent.parent.resolve()
+        self.image_filename = 'images/Freno.png'
         self.image = Image.open(os.path.join(self.base_path, self.image_filename))
         self.image = self.image.resize((350,350), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)
@@ -358,7 +359,7 @@ FD: Factor de diseño"""
 
 
 
-if __name__ == "__main__":
-    root = Tk()
-    root.wm_title("Frenos de tambor con zapata interna")
-    ZapataInternaWindow(root).mainloop()
+# if __name__ == "__main__":
+#     root = Tk()
+#     root.wm_title("Frenos de tambor con zapata interna")
+#     ZapataInternaWindow(root).mainloop()
