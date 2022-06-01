@@ -1,5 +1,5 @@
 from tkinter import *
-from Frenos_tambor_zapata_interna import ZapataInternaWindow
+from .Frenos_tambor_zapata_interna import ZapataInternaWindow
 
 
 class Seleccion(Frame):

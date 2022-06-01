@@ -4,9 +4,10 @@ from tkinter import ttk
 
 class TablaMaterialesSI(Frame):
 
-    def __init__(self, master=None):
+    def __init__(self, master=None, parent=None):
         super().__init__(master, width=1400, height=500)
         self.master = master
+        self.parent = parent
         self.pack()
         self.create_widget()
 
@@ -73,14 +74,21 @@ class TablaMaterialesSI(Frame):
             a12 = sas.get("values")[1]
             self.txttabla.delete(0,"end")
             self.txttabla.insert(0,a12)
+            
         self.table.bind('<ButtonRelease-1>', selectItem)
 
         self.lbl = Label(self,text='Pa')
         self.lbl.place(x=10, y=450, width=50, height=20)
         self.txttabla = Entry(self)
-        self.txttabla.place(x=70, y=450, width=80, height=20) 
+        self.txttabla.place(x=70, y=450, width=80, height=20)
 
-        self.submit = Button(self, text="Insertar")
+        def set_mawp():
+            mawp = self.txttabla.get()
+            self.parent.txt18.insert(0, mawp)
+            self.master.destroy()
+            return mawp
+
+        self.submit = Button(self, text="Insertar", command=set_mawp)
         self.submit.place(x=160, y=450)
 
 

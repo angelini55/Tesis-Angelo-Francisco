@@ -1,9 +1,11 @@
+import os
+import pathlib
 from tkinter import *
 from tkinter import messagebox; PhotoImage
 from math import *
 from PIL import ImageTk, Image
-from Frenos_tambor_zapata_interna import ZapataInternaWindow
-from Menu_de_seleccion import Seleccion
+from views.Frenos_tambor_zapata_interna import ZapataInternaWindow
+from views.Menu_de_seleccion import Seleccion
 
 
 vent = Tk()
@@ -21,7 +23,9 @@ lbl.place(x=250, y=50)
 lbl2 = Label(vent, text="Programa para el analisis y diseño de frenos y embragues")
 lbl2.place(x=250, y=250)
 
-image = Image.open("C:\\Users\\angel\\Desktop\\Codigo_python\\Logo_LUZ.png")
+base_path = pathlib.Path(__file__).parent.resolve()
+image_filename = 'images/Logo_LUZ.png'
+image = Image.open(os.path.join(base_path, image_filename))
 image = image.resize((200,200), Image.ANTIALIAS)
 img = ImageTk.PhotoImage(image)
 lbl3 = Label(vent, image=img)
