@@ -7,13 +7,112 @@ from PIL import ImageTk, Image
 class Application(Frame):
 
     def __init__(self, master=None):
-        super().__init__(master, width=800, height=700)
+        super().__init__(master, width=650, height=680)
         self.master = master
         self.pack()
         self.create_widget()
+
+    def operacionesT(self):
+        a1 = float(self.txt1.get())
+        a2 = float(self.txt2.get())
+        a3 = float(self.txt3.get())
+        a4 = float(self.txt4.get())
+        a5 = float(self.txt5.get())
+        a6 = float(self.txt6.get())
+        a7 = float(self.txt7.get())
+        a8 = float(self.txt8.get())
+        a9 = float(self.txt9.get())
+        a10 = float(self.txt10.get())
+        a11 = float(self.txt11.get())
+
+        I1 = -cos(a8*(3.14/180)) + cos(a7*(3.14/180))
+        I2 = 0.5*(sin(a8*(3.14/180))**2) - 0.5*(sin(a7*(3.14/180))**2)
+        I3 = ((a8/2)*(3.14/180))-0.25*sin(2*((a8)*(3.14/180))) - (((a7/2)*(3.14/180))-0.25*sin(2*((a7)*(3.14/180))))
+
+        Padm = (a1*sin(a9*(3.14/180)))/(a2*a6*((a5/2)**2)*I1)
+
+        Mn = (Padm*a6*a3*(a5/2)/(sin(a9*(3.14/180))))*I3
+        Mf = (a2*Padm*a6*(a5/2)/(sin(a9*(3.14/180))))*((a5/2)*I1 - a3*I2)
+
+        if self.seleccion.get() == 1:
+            F = (Mn-Mf)/a4
+            F = round(F,3)
+
+            Rx = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I2-(a2*I3))) - a10
+            Ry = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I3+(a2*I2))) - a11
+        
+        if self.seleccion.get() == 2:
+            F = (Mn+Mf)/a4
+            F = round(F,3)
+
+            Rx = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I2+(a2*I3))) - a10
+            Ry = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I3-(a2*I2))) - a11
+        
+        self.txt14.delete(0,"end")
+        self.txt14.insert(0,F)
+
+        self.txt15.delete(0,"end")
+        self.txt15.insert(0,Padm)
+
+        self.txt12.delete(0,"end")
+        self.txt12.insert(0,Rx)
+        self.txt13.delete(0,"end")
+        self.txt13.insert(0,Ry)
+    
+    def operacionesPadm(self):
+        a1 = float(self.txt1.get())
+        a2 = float(self.txt2.get())
+        a3 = float(self.txt3.get())
+        a4 = float(self.txt4.get())
+        a5 = float(self.txt5.get())
+        a6 = float(self.txt6.get())
+        a7 = float(self.txt7.get())
+        a8 = float(self.txt8.get())
+        a9 = float(self.txt9.get())
+        a10 = float(self.txt10.get())
+        a11 = float(self.txt11.get())
+
+        I1 = -cos(a8*(3.14/180)) + cos(a7*(3.14/180))
+        I2 = 0.5*(sin(a8*(3.14/180))**2) - 0.5*(sin(a7*(3.14/180))**2)
+        I3 = ((a8/2)*(3.14/180))-0.25*sin(2*((a8)*(3.14/180))) - (((a7/2)*(3.14/180))-0.25*sin(2*((a7)*(3.14/180))))
+
+        Mn = (a1*a6*a3*(a5/2)/(sin(a9*(3.14/180))))*I3
+        Mf = (a2*a1*a6*(a5/2)/(sin(a9*(3.14/180))))*((a5/2)*I1 - a3*I2)
+
+        if self.seleccion.get() == 1:
+            F = (Mn-Mf)/a4
+            F = round(F,3)
+
+            T = (a2*a1*a6*((a5/2)**2)*I1)/(sin(a9*(3.14/180)))
+            T = round(T,3)
+
+            Rx = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(I2-(a2*I3))) - a10
+            Ry = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(I3+(a2*I2))) - a11
+        
+        if self.seleccion.get() == 2:
+            F = (Mn+Mf)/a4
+            F = round(F,3)
+
+            T = (a2*a1*a6*((a5/2)**2)*I1)/(sin(a9*(3.14/180)))
+            T = round(T,3)
+
+            Rx = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(I2+(a2*I3))) - a10
+            Ry = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(I3-(a2*I2))) - a11
+
+        self.txt15.delete(0,"end")
+        self.txt15.insert(0,F)
+
+        self.txt14.delete(0,"end")
+        self.txt14.insert(0,T)
+
+        
+        self.txt12.delete(0,"end")
+        self.txt12.insert(0,Rx)
+        self.txt13.delete(0,"end")
+        self.txt13.insert(0,Ry)
         
 
-    def operaciones(self):
+    def operacionesF(self):
         a1 = float(self.txt1.get())
         a2 = float(self.txt2.get())
         a3 = float(self.txt3.get())
@@ -130,14 +229,31 @@ FD: Factor de diseño"""
         self.radio1 = Radiobutton(self, text="autoenergizante", variable=self.seleccion, value=1)
         self.radio2 = Radiobutton(self, text="autodesenergizante", variable=self.seleccion, value=2)
 
-        self.opciones = ["Dada F, hallar T y PD", "Dada T, hallar F y PD", "Dada PD, hallar F y T"]
+        self.opciones = ["Dada F, hallar T y Padm", "Dada T, hallar F y Padm", "Dada Padm, hallar F y T"]
         self.list = Combobox(self, width=25, values=self.opciones, state="readonly" )
+        def callback(event): 
+            if self.list.get() == self.opciones[0]:
+                self.lbl1.config(text="F")
+                self.lbl14.config(text="T")
+                self.lbl15.config(text="Padm")
+                self.btn.config(command=self.operacionesF)
+            elif self.list.get() == self.opciones[1]:
+                self.lbl1.config(text="T")
+                self.lbl14.config(text="F")
+                self.lbl15.config(text="Padm")
+            elif self.list.get() == self.opciones[2]:
+                self.lbl1.config(text="Padm")
+                self.lbl14.config(text="T")
+                self.lbl15.config(text="F") 
+                self.btn.config(command=self.operacionesPadm)
+        self.list.bind('<<ComboboxSelected>>', callback)
+        self.list.current(0)
 
-        self.btn = Button(self, text='Solve', command = self.operaciones)
+        self.btn = Button(self, text='Solve', command = self.operacionesF)
         self.btn2 = Button(self, text='?', command = self.ayuda)
 
         self.image = Image.open("C:\\Users\\angel\\Desktop\\Codigo_python\\Freno.png")
-        self.image = self.image.resize((400,400), Image.ANTIALIAS)
+        self.image = self.image.resize((350,350), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)
         self.lbl17 = Label(self, image=self.img)
 
@@ -152,12 +268,12 @@ FD: Factor de diseño"""
         self.lbl9.place(x=10, y=310, width=50, height=20)
         self.lbl10.place(x=10, y=340, width=50, height=20)
         self.lbl11.place(x=10, y=370, width=50, height=20)
-        self.lbl12.place(x=10, y=540, width=50, height=20)
-        self.lbl13.place(x=10, y=570, width=50, height=20)
-        self.lbl14.place(x=10, y=600, width=50, height=20)
-        self.lbl15.place(x=10, y=630, width=50, height=20)
-        self.lbl16.place(x=10, y=660, width=50, height=20)
-        self.lbl17.place(x=400, y=10, width=400, height=400)
+        self.lbl12.place(x=10, y=510, width=50, height=20)
+        self.lbl13.place(x=10, y=540, width=50, height=20)
+        self.lbl14.place(x=10, y=570, width=50, height=20)
+        self.lbl15.place(x=10, y=600, width=50, height=20)
+        self.lbl16.place(x=10, y=630, width=50, height=20)
+        self.lbl17.place(x=270, y=10, width=350, height=350)
         
 
         self.txt1.place(x=70, y=70, width=80, height=20)
@@ -171,19 +287,19 @@ FD: Factor de diseño"""
         self.txt9.place(x=70, y=310, width=80, height=20)
         self.txt10.place(x=70, y=340, width=80, height=20)
         self.txt11.place(x=70, y=370, width=80, height=20)
-        self.txt12.place(x=70, y=540, width=80, height=20)
-        self.txt13.place(x=70, y=570, width=80, height=20)
-        self.txt14.place(x=70, y=600, width=80, height=20)
-        self.txt15.place(x=70, y=630, width=80, height=20)
-        self.txt16.place(x=70, y=660, width=80, height=20)
+        self.txt12.place(x=70, y=510, width=80, height=20)
+        self.txt13.place(x=70, y=540, width=80, height=20)
+        self.txt14.place(x=70, y=570, width=80, height=20)
+        self.txt15.place(x=70, y=600, width=80, height=20)
+        self.txt16.place(x=70, y=630, width=80, height=20)
 
-        self.btn.place(x=500, y=450, width=150, height=100)
-        self.btn2.place(x=280, y=10, width=40, height=40)
+        self.btn.place(x=375, y=400, width=150, height=100)
+        self.btn2.place(x=180, y=10, width=40, height=40)
         
-        self.radio1.place(x=130, y=10,)
-        self.radio2.place(x=130, y=30,)
+        self.radio1.place(x=30, y=10,)
+        self.radio2.place(x=30, y=30,)
 
-        self.list.place(x=30, y=400)        
+        self.list.place(x=30, y=400)   
 
 
 
