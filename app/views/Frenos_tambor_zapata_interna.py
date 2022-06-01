@@ -288,7 +288,7 @@ FD: Factor de diseño"""
         self.btn3 = Button(self, text='tabla', command=self.tablaSI)
 
         self.base_path = pathlib.Path(__file__).parent.parent.resolve()
-        self.image_filename = 'Freno.png'
+        self.image_filename = 'images/Freno.png'
         self.image = Image.open(os.path.join(self.base_path, self.image_filename))
         self.image = self.image.resize((350,350), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)
