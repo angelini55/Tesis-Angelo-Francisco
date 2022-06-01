@@ -1,16 +1,23 @@
+import os
+import pathlib
 from tkinter import *
 from tkinter import messagebox
 from tkinter.ttk import Combobox; PhotoImage; Combobox
 from math import *
 from PIL import ImageTk, Image
+from TablaMaterialesFriccionSI import TablaMaterialesSI
 
-class Application(Frame):
+class ZapataInternaWindow(Frame):
 
     def __init__(self, master=None):
-        super().__init__(master, width=650, height=680)
+        super().__init__(master, width=700, height=680)
         self.master = master
         self.pack()
         self.create_widget()
+
+    def tablaSI(self):
+        tabla = Toplevel()
+        TablaMaterialesSI(tabla) 
 
     def operacionesT(self):
         a1 = float(self.txt1.get())
@@ -31,7 +38,7 @@ class Application(Frame):
 
         Padm = (a1*sin(a9*(3.14/180)))/(a2*a6*((a5/2)**2)*I1)
 
-        Mn = (Padm*a6*a3*(a5/2)/(sin(a9*(3.14/180))))*I3
+        Mn = (Padm*a6*a3*(a5/2)/(sin(a9*(pi/180))))*I3
         Mf = (a2*Padm*a6*(a5/2)/(sin(a9*(3.14/180))))*((a5/2)*I1 - a3*I2)
 
         if self.seleccion.get() == 1:
@@ -190,6 +197,11 @@ FD: Factor de diseño"""
 
     def create_widget(self):
 
+        # self.labels = []
+        # brakes_parmeters = ('F', 'µ', 'a', 'c', 'D', 'b', 'Θ1', 'Θ2', 'Θa', 'Fx', 'Fy', 'Rx', 'Ry', 'T', 'Padm', 'FD')
+        # for parameter in brakes_parmeters:
+        #    self.labels.append(Label(self, text=parameter))
+
         self.lbl1 = Label(self,text='F')
         self.lbl2 = Label(self,text='µ')
         self.lbl3 = Label(self,text='a')
@@ -206,6 +218,22 @@ FD: Factor de diseño"""
         self.lbl14 = Label(self,text='T')
         self.lbl15 = Label(self,text='Padm')
         self.lbl16 = Label(self,text='FD')
+        self.lbl18 = Label(self,text='Pa')
+
+        self.lbl20 = Label(self,text='N')
+        self.lbl22 = Label(self,text='m')
+        self.lbl23 = Label(self,text='m')
+        self.lbl24 = Label(self,text='m')
+        self.lbl25 = Label(self,text='m')
+        self.lbl26 = Label(self,text='°')
+        self.lbl27 = Label(self,text='°')
+        self.lbl28 = Label(self,text='°')
+        self.lbl29 = Label(self,text='N')
+        self.lbl30 = Label(self,text='N')
+        self.lbl31 = Label(self,text='N')
+        self.lbl32 = Label(self,text='N')
+        self.lbl33 = Label(self,text='N.m')
+        self.lbl34 = Label(self,text='kPa')
 
         self.txt1 = Entry(self)
         self.txt2 = Entry(self)
@@ -223,11 +251,16 @@ FD: Factor de diseño"""
         self.txt14 = Entry(self)
         self.txt15 = Entry(self)
         self.txt16 = Entry(self)
+        self.txt18 = Entry(self)
 
         self.seleccion = IntVar()
+        self.seleccion2 = IntVar()
         self.seleccion.set(1)
+        self.seleccion2.set(1)
         self.radio1 = Radiobutton(self, text="autoenergizante", variable=self.seleccion, value=1)
         self.radio2 = Radiobutton(self, text="autodesenergizante", variable=self.seleccion, value=2)
+        self.radio3 = Radiobutton(self, text="Sistema Internacional", variable=self.seleccion2, value=1)
+        self.radio4 = Radiobutton(self, text="Sistema Ingles", variable=self.seleccion2, value=2)
 
         self.opciones = ["Dada F, hallar T y Padm", "Dada T, hallar F y Padm", "Dada Padm, hallar F y T"]
         self.list = Combobox(self, width=25, values=self.opciones, state="readonly" )
@@ -251,8 +284,11 @@ FD: Factor de diseño"""
 
         self.btn = Button(self, text='Solve', command = self.operacionesF)
         self.btn2 = Button(self, text='?', command = self.ayuda)
+        self.btn3 = Button(self, text='tabla', command=self.tablaSI)
 
-        self.image = Image.open("C:\\Users\\angel\\Desktop\\Codigo_python\\Freno.png")
+        self.base_path = pathlib.Path(__file__).parent.resolve()
+        self.image_filename = 'Freno.png'
+        self.image = Image.open(os.path.join(self.base_path, self.image_filename))
         self.image = self.image.resize((350,350), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)
         self.lbl17 = Label(self, image=self.img)
@@ -273,8 +309,23 @@ FD: Factor de diseño"""
         self.lbl14.place(x=10, y=570, width=50, height=20)
         self.lbl15.place(x=10, y=600, width=50, height=20)
         self.lbl16.place(x=10, y=630, width=50, height=20)
-        self.lbl17.place(x=270, y=10, width=350, height=350)
-        
+        self.lbl17.place(x=300, y=10, width=350, height=350)
+        self.lbl18.place(x=190, y=510, width=40, height=20)
+
+        self.lbl20.place(x=150, y=70, width=50, height=20)
+        self.lbl22.place(x=150, y=130, width=50, height=20)
+        self.lbl23.place(x=150, y=160, width=50, height=20)
+        self.lbl24.place(x=150, y=190, width=50, height=20)
+        self.lbl25.place(x=150, y=220, width=50, height=20)
+        self.lbl26.place(x=150, y=250, width=50, height=20)
+        self.lbl27.place(x=150, y=280, width=50, height=20)
+        self.lbl28.place(x=150, y=310, width=50, height=20)
+        self.lbl29.place(x=150, y=340, width=50, height=20)
+        self.lbl30.place(x=150, y=370, width=50, height=20)
+        self.lbl31.place(x=150, y=510, width=50, height=20)
+        self.lbl32.place(x=150, y=540, width=50, height=20)
+        self.lbl33.place(x=150, y=570, width=50, height=20)
+        self.lbl34.place(x=150, y=600, width=50, height=20)
 
         self.txt1.place(x=70, y=70, width=80, height=20)
         self.txt2.place(x=70, y=100, width=80, height=20)
@@ -292,12 +343,16 @@ FD: Factor de diseño"""
         self.txt14.place(x=70, y=570, width=80, height=20)
         self.txt15.place(x=70, y=600, width=80, height=20)
         self.txt16.place(x=70, y=630, width=80, height=20)
+        self.txt18.place(x=220, y=510, width=80, height=20)
 
-        self.btn.place(x=375, y=400, width=150, height=100)
-        self.btn2.place(x=180, y=10, width=40, height=40)
+        self.btn.place(x=385, y=400, width=150, height=100)
+        self.btn2.place(x=200, y=60, width=40, height=40)
+        self.btn3.place(x=200, y=540, width=40, height=40)
         
-        self.radio1.place(x=30, y=10,)
-        self.radio2.place(x=30, y=30,)
+        self.radio1.place(x=15, y=10,)
+        self.radio2.place(x=15, y=30,)
+        self.radio3.place(x=150, y=10,)
+        self.radio4.place(x=150, y=30,)
 
         self.list.place(x=30, y=400)   
 
@@ -306,4 +361,4 @@ FD: Factor de diseño"""
 if __name__ == "__main__":
     root = Tk()
     root.wm_title("Frenos de tambor con zapata interna")
-    Application(root).mainloop()
+    ZapataInternaWindow(root).mainloop()
