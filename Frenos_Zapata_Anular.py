@@ -8,7 +8,7 @@ from PIL import ImageTk, Image
 from TablaMaterialesFriccionSI import TablaMaterialesSI
 from TablaMaterialesFriccionIngles import TablaMaterialesIngles
 
-class DiscoWindow(Frame):
+class ZapataAnularWindow(Frame):
 
     def __init__(self, master=None):
         super().__init__(master, width=700, height=480)
@@ -17,13 +17,15 @@ class DiscoWindow(Frame):
         self.create_widget()
 
     def ayuda(self):
-        self.mensaje = """D: Diametro externo del disco de friccion
-d: Diametro interno del disco de friccion
+        self.mensaje = """ri: Radio interno de la zapata anular
+ro: Radio externo de la zapata anular
+Θ1: Angulo inicial del material de friccion
+Θ2: Angulo final del material de friccion
 µ: Coeficiente de friccion
-F: Fuerza de accionamiento 
-NS: Numero de superficies de friccion
-Padm: Presion maxima admisible ejercida sobre el material de friccion
 T: Par de torsion del freno o embrague
+Padm: Presion maxima admisible ejercida sobre el material de friccion
+F: Fuerza de accionamiento
+r': Ubicacion de la linea de accion de la fuerza de accionamiento
 FD: Factor de diseño"""
 
         messagebox.showinfo(title="Ayuda", message=self.mensaje)
@@ -42,54 +44,62 @@ FD: Factor de diseño"""
         else:
             Pa = float(self.txt18.get())
         if self.list.get() == self.opciones[2]:
-            Fdiseño = Pa/float(self.textos[3].get())
-            self.textos2[2].delete(0,"end")
-            self.textos2[2].insert(0,Fdiseño)
+            Fdiseño = Pa/float(self.textos[5].get())
+            self.textos2[3].delete(0,"end")
+            self.textos2[3].insert(0,Fdiseño)
         else:
             Fdiseño = Pa/float(self.textos2[0].get())
-            self.textos2[2].delete(0,"end")
-            self.textos2[2].insert(0,Fdiseño)
+            self.textos2[3].delete(0,"end")
+            self.textos2[3].insert(0,Fdiseño)
 
     def operacionesPadm(self):
-        D = float(self.textos[0].get())
-        d = float(self.textos[1].get())
-        µ = float(self.textos[2].get())
-        Padm = float(self.textos[3].get())
-        NS = float(self.textos[4].get())
+        ri = float(self.textos[0].get())
+        ro = float(self.textos[1].get())
+        Θ1 = float(self.textos[2].get())
+        Θ2 = float(self.textos[3].get())
+        µ = float(self.textos[4].get())
+        Padm = float(self.textos[5].get())
 
         if self.seleccion.get() == 1:
             
-            F = Padm*(pi/4)*((D**2)-(d**2))
-            T = ((pi*µ*Padm*NS)/12)*((D**3)-(d**3))
+            F = (1/2)*(radians(Θ2-Θ1))*Padm*((ro**2)-(ri**2))
+            T = (1/3)*µ*Padm*(radians(Θ2-Θ1))*((ro**3)-(ri**3))
+            rprima = (2/3)*((((ro**3)-(ri**3)))/((ro**2)-(ri**2)))*(((cos(radians(Θ1))-cos(radians(Θ2))))/radians(Θ2-Θ1))
 
         if self.seleccion.get() == 2:
 
-            F = Padm*((pi*d)/2)*(D-d)
-            T = ((pi*d*µ*Padm*NS)/8)*((D**2)-(d**2))
+            F = (radians(Θ2-Θ1))*Padm*ri*(ro-ri)
+            T = (1/2)*µ*Padm*ri*(radians(Θ2-Θ1))*((ro**2)-(ri**2))
+            rprima = ((ro+ri)/2)*(((cos(radians(Θ1))-cos(radians(Θ2))))/radians(Θ2-Θ1))
         
         self.textos2[0].delete(0,"end")
-        self.textos2[0].insert(0,F)
+        self.textos2[0].insert(0,T)
 
         self.textos2[1].delete(0,"end")
-        self.textos2[1].insert(0,T)
+        self.textos2[1].insert(0,F)
+
+        self.textos2[2].delete(0,"end")
+        self.textos2[2].insert(0,rprima)
 
     def operacionesT(self):
-        pass
-        D = float(self.textos[0].get())
-        d = float(self.textos[1].get())
-        µ = float(self.textos[2].get())
-        T = float(self.textos[3].get())
-        NS = float(self.textos[4].get())
+        ri = float(self.textos[0].get())
+        ro = float(self.textos[1].get())
+        Θ1 = float(self.textos[2].get())
+        Θ2 = float(self.textos[3].get())
+        µ = float(self.textos[4].get())
+        T = float(self.textos[5].get())
 
         if self.seleccion.get() == 1:
 
-            Padm = (12*T)/(pi*µ*NS*((D**3)-(d**3)))
-            F = Padm*(pi/4)*((D**2)-(d**2))
+             Padm = (3*T)/(µ*radians(Θ2-Θ1)*((ro**3)-(ri**3)))
+             F = 0.5*radians(Θ2-Θ1)*Padm*((ro**2)-(ri**2))
+             rprima = (2/3)*((((ro**3)-(ri**3)))/((ro**2)-(ri**2)))*(((cos(radians(Θ1))-cos(radians(Θ2))))/radians(Θ2-Θ1))
 
         if self.seleccion.get() == 2:
 
-            Padm = (8*T)/(pi*d*µ*NS*((D**2)-(d**2)))
-            F = Padm*((pi*d)/2)*(D-d)
+            Padm = (2*T)/(µ*ri*radians(Θ2-Θ1)*((ro**2)-(ri**2)))
+            F = radians(Θ2-Θ1)*Padm*ri*(ro-ri)
+            rprima = ((ro+ri)/2)*(((cos(radians(Θ1))-cos(radians(Θ2))))/radians(Θ2-Θ1))
 
         self.textos2[0].delete(0,"end")
         self.textos2[0].insert(0,Padm)
@@ -97,28 +107,37 @@ FD: Factor de diseño"""
         self.textos2[1].delete(0,"end")
         self.textos2[1].insert(0,F)
 
+        self.textos2[2].delete(0,"end")
+        self.textos2[2].insert(0,rprima)
+
     def operacionesF(self):
-        D = float(self.textos[0].get())
-        d = float(self.textos[1].get())
-        µ = float(self.textos[2].get())
-        F = float(self.textos[3].get())
-        NS = float(self.textos[4].get())
+        ri = float(self.textos[0].get())
+        ro = float(self.textos[1].get())
+        Θ1 = float(self.textos[2].get())
+        Θ2 = float(self.textos[3].get())
+        µ = float(self.textos[4].get())
+        F = float(self.textos[5].get())
 
         if self.seleccion.get() == 1:
 
-            Padm = (4*F)/(pi*((D**2)-(d**2)))
-            T = ((pi*µ*Padm*NS)/12)*((D**3)-(d**3))
+            Padm = (2*F)/((radians(Θ2-Θ1))*((ro**2)-(ri**2)))
+            T = (1/3)*µ*Padm*(radians(Θ2-Θ1))*((ro**3)-(ri**3))
+            rprima = (2/3)*((((ro**3)-(ri**3)))/((ro**2)-(ri**2)))*(((cos(radians(Θ1))-cos(radians(Θ2))))/radians(Θ2-Θ1))
 
         if self.seleccion.get() == 2:
 
-            Padm = (2*F)/(pi*d*(D-d))
-            T = ((pi*d*µ*Padm*NS)/8)*((D**2)-(d**2))
+            Padm = (F)/((radians(Θ2-Θ1))*ri*(ro-ri))
+            T = (1/2)*µ*Padm*ri*(radians(Θ2-Θ1))*((ro**2)-(ri**2))
+            rprima = ((ro+ri)/2)*(((cos(radians(Θ1))-cos(radians(Θ2))))/radians(Θ2-Θ1))
         
         self.textos2[0].delete(0,"end")
         self.textos2[0].insert(0,Padm)
 
         self.textos2[1].delete(0,"end")
         self.textos2[1].insert(0,T)
+
+        self.textos2[2].delete(0,"end")
+        self.textos2[2].insert(0,rprima)
         
 
     def create_widget(self):
@@ -132,7 +151,7 @@ FD: Factor de diseño"""
         self.radio2.place(x=20, y=30)
 
         self.labels = []
-        textoslbl = ["D","d","µ","F","NS"]
+        textoslbl = ["ri","ro","Θ1","Θ2","µ","T"]
         for textos in textoslbl:
             self.labels.append(Label(self, text=textos))
         i=70
@@ -141,7 +160,7 @@ FD: Factor de diseño"""
             i += 30
         
         self.textos = []
-        for texto in range(0,5):
+        for texto in range(0,6):
             self.textos.append(Entry(self))
         i=70
         for parameters in self.textos:
@@ -149,7 +168,7 @@ FD: Factor de diseño"""
             i += 30
 
         self.listunds = []
-        unds = ["m","m","","N",""]
+        unds = ["m","m","°","°","","N.m"]
         for unidades in unds:
             self.listunds.append(Label(self))
         i=70
@@ -158,7 +177,7 @@ FD: Factor de diseño"""
             i += 30
 
         self.labels2 = []
-        textoslabels2 = ["Padm","T","FD"]
+        textoslabels2 = ["Padm","F","r'","FD"]
         for textos in textoslabels2:
             self.labels2.append(Label(self, text=textos))
         i=270
@@ -167,7 +186,7 @@ FD: Factor de diseño"""
             i += 30
 
         self.textos2 = []
-        for texto in range(0,3):
+        for texto in range(0,4):
             self.textos2.append(Entry(self))
         i=270
         for parameters in self.textos2:
@@ -175,7 +194,7 @@ FD: Factor de diseño"""
             i += 30
 
         self.listunds2 = []
-        unds2 = ["Pa","N.m"]
+        unds2 = ["Pa","N","m",""]
         for unidades in unds2:
             self.listunds2.append(Label(self))
         i=270
@@ -184,21 +203,21 @@ FD: Factor de diseño"""
             i += 30
 
         self.base_path = pathlib.Path(__file__).parent.resolve()
-        self.image_filename ='images\\Freno Disco.png'
+        self.image_filename ='images\\Freno Zapata Anular.png'
         self.image = Image.open(os.path.join(self.base_path, self.image_filename))
-        self.image = self.image.resize((250,250), Image.Resampling.LANCZOS)
+        self.image = self.image.resize((300,250), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)
         self.lbl17 = Label(self, image=self.img)
-        self.lbl17.place(x=410, y=10, height=250, width=250)
+        self.lbl17.place(x=390, y=10, height=250, width=300)
 
-        self.boton1 = Button(self, text="Solve", command=self.operacionesF)
+        self.boton1 = Button(self, text="Solve", command=self.operacionesT)
         self.boton1.place(x=450, y=300, width=100, height=80)
 
         self.lblSU = Label(self, text="Sistema de unidades")
         self.lblSU.place(x=215, y=15, width=120, height=20)
 
-        Internacional = ["m","m","","N","","Pa","N.m"]
-        Ingles = ["in","in","","lb","","PSI","lb.in"]
+        Internacional = ["m","m","°","°","","N.m","Pa","N","m",""]
+        Ingles = ["in","in","°","°","","lb.in","PSI","lb","in",""]
 
         self.listaUnds = ["Sistema Internacional","Sistema Ingles"]
         self.list2 = Combobox(self, width=20, values=self.listaUnds, state="readonly")
@@ -230,57 +249,57 @@ FD: Factor de diseño"""
         def callback(event):
             if self.list.get() == self.opciones[0]:
                 if self.list2.get() == self.listaUnds[0]:
-                    self.labels[3].config(text="F")
+                    self.labels[5].config(text="F")
                     self.labels2[0].config(text="Padm")
                     self.labels2[1].config(text="T")
-                    self.listunds[3].config(text="N")
+                    self.listunds[5].config(text="N")
                     self.listunds2[0].config(text="Pa")
                     self.listunds2[1].config(text="N.m")
                     self.boton1.config(command=self.operacionesF)
                 if self.list2.get() == self.listaUnds[1]:
-                    self.labels[3].config(text="F")
+                    self.labels[5].config(text="F")
                     self.labels2[0].config(text="Padm")
                     self.labels2[1].config(text="T")
-                    self.listunds[3].config(text="lb")
+                    self.listunds[5].config(text="lb")
                     self.listunds2[0].config(text="PSI")
                     self.listunds2[1].config(text="lb.in")
                     self.boton1.config(command=self.operacionesF)
             elif self.list.get() == self.opciones[1]:
                 if self.list2.get() == self.listaUnds[0]:
-                    self.labels[3].config(text="T")
+                    self.labels[5].config(text="T")
                     self.labels2[0].config(text="Padm")
                     self.labels2[1].config(text="F")
-                    self.listunds[3].config(text="N.m")
+                    self.listunds[5].config(text="N.m")
                     self.listunds2[0].config(text="Pa")
                     self.listunds2[1].config(text="N")
                     self.boton1.config(command=self.operacionesT)
                 if self.list2.get() == self.listaUnds[1]:
-                    self.labels[3].config(text="T")
+                    self.labels[5].config(text="T")
                     self.labels2[0].config(text="Padm")
                     self.labels2[1].config(text="F")
-                    self.listunds[3].config(text="lb.in")
+                    self.listunds[5].config(text="lb.in")
                     self.listunds2[0].config(text="PSI")
                     self.listunds2[1].config(text="lb")
                     self.boton1.config(command=self.operacionesT)
             elif self.list.get() == self.opciones[2]:
                 if self.list2.get() == self.listaUnds[0]:
-                    self.labels[3].config(text="Padm")
+                    self.labels[5].config(text="Padm")
                     self.labels2[0].config(text="T")
                     self.labels2[1].config(text="F")
-                    self.listunds[3].config(text="Pa")
+                    self.listunds[5].config(text="Pa")
                     self.listunds2[0].config(text="N.m")
                     self.listunds2[1].config(text="N")
                     self.boton1.config(command=self.operacionesPadm)
                 if self.list2.get() == self.listaUnds[1]:
-                    self.labels[3].config(text="Padm")
+                    self.labels[5].config(text="Padm")
                     self.labels2[0].config(text="T")
                     self.labels2[1].config(text="F")
-                    self.listunds[3].config(text="PSI")
+                    self.listunds[5].config(text="PSI")
                     self.listunds2[0].config(text="lb.in")
                     self.listunds2[1].config(text="lb")
                     self.boton1.config(command=self.operacionesPadm)
         self.list.bind('<<ComboboxSelected>>', callback)
-        self.list.current(0)
+        self.list.current(1)
 
         self.list.place(x=215, y=70)
 
@@ -301,4 +320,4 @@ FD: Factor de diseño"""
 if __name__ == "__main__":
     root = Tk()
     root.wm_title("Frenos de tambor con zapata interna")
-    DiscoWindow(root).mainloop()
+    ZapataAnularWindow(root).mainloop()

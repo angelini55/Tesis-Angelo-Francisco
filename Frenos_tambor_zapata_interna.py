@@ -25,7 +25,10 @@ class ZapataInternaWindow(Frame):
             self.table = TablaMaterialesIngles(tabla, self)
 
     def CalcFD(self):
-        Pa = float(self.txt18.get())
+        if self.list2.get() == self.listaUnds[0]:
+            Pa = float(self.txt18.get())*1000
+        else:
+            Pa = float(self.txt18.get())
         if self.list.get() == self.opciones[2]:
             Fdiseño = Pa/float(self.txt1.get())
             self.txt16.delete(0,"end")
@@ -287,16 +290,18 @@ FD: Factor de diseño"""
                 for lbl in unds:
                     lbl.config(text=Internacional[i])
                     i += 1
+                self.list["state"]="readonly"
             if self.list2.get() == self.listaUnds[1]:
                 i=0
                 for lbl in unds:
                     lbl.config(text=Ingles[i])
                     i += 1
+                self.list["state"]="readonly"
         self.list2.bind('<<ComboboxSelected>>', cambioUnds)
 
 
         self.opciones = ["Dada F, hallar T y Padm", "Dada T, hallar F y Padm", "Dada Padm, hallar F y T"]
-        self.list = Combobox(self, width=25, values=self.opciones, state="readonly")
+        self.list = Combobox(self, width=25, values=self.opciones, state="disabled")
         def callback(event): 
             if self.list.get() == self.opciones[0]:
                 if self.list2.get() == self.listaUnds[0]:
@@ -358,7 +363,7 @@ FD: Factor de diseño"""
         self.btn4 = Button(self, text='calc', command=self.CalcFD)
 
         self.base_path = pathlib.Path(__file__).parent.resolve()
-        self.image_filename = 'Freno.png'
+        self.image_filename = 'images\\Freno.png'
         self.image = Image.open(os.path.join(self.base_path, self.image_filename))
         self.image = self.image.resize((350,350), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)

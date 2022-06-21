@@ -8,7 +8,7 @@ from PIL import ImageTk, Image
 from TablaMaterialesFriccionSI import TablaMaterialesSI
 from TablaMaterialesFriccionIngles import TablaMaterialesIngles
 
-class DiscoWindow(Frame):
+class CircularWindow(Frame):
 
     def __init__(self, master=None):
         super().__init__(master, width=700, height=480)
@@ -17,13 +17,12 @@ class DiscoWindow(Frame):
         self.create_widget()
 
     def ayuda(self):
-        self.mensaje = """D: Diametro externo del disco de friccion
-d: Diametro interno del disco de friccion
+        self.mensaje = """R: Radio de la zapata circular
+r': Ubicación de la línea de acción de la fuerza de accionamiento
+Padm: Presión máxima admisible ejercida sobre el material de fricción
 µ: Coeficiente de friccion
-F: Fuerza de accionamiento 
-NS: Numero de superficies de friccion
-Padm: Presion maxima admisible ejercida sobre el material de friccion
 T: Par de torsion del freno o embrague
+F: Fuerza de accionamiento
 FD: Factor de diseño"""
 
         messagebox.showinfo(title="Ayuda", message=self.mensaje)
@@ -42,7 +41,7 @@ FD: Factor de diseño"""
         else:
             Pa = float(self.txt18.get())
         if self.list.get() == self.opciones[2]:
-            Fdiseño = Pa/float(self.textos[3].get())
+            Fdiseño = Pa/float(self.textos[2].get())
             self.textos2[2].delete(0,"end")
             self.textos2[2].insert(0,Fdiseño)
         else:
@@ -50,46 +49,99 @@ FD: Factor de diseño"""
             self.textos2[2].delete(0,"end")
             self.textos2[2].insert(0,Fdiseño)
 
-    def operacionesPadm(self):
-        D = float(self.textos[0].get())
-        d = float(self.textos[1].get())
-        µ = float(self.textos[2].get())
-        Padm = float(self.textos[3].get())
-        NS = float(self.textos[4].get())
+    def _interpolation(self, string, value):
+        self.string = string
+        self.value = value
+        selected_dropdown_option = string  #  Value to get from the interface
+        reference_value = value            #  Value to get from the interface
 
-        if self.seleccion.get() == 1:
+        database_dict = {
+            "alpha": [],
+            "beta": [],
+            "Rr": [],
+            "alpha_diff": [],
+            "beta_diff": [],
+            "Rr_diff": []
+        }
+
+        #  Connect to database to get this
+        table_data = [(0.5, 0.938, 1.875), (0.4, 0.947, 1.578), (0.3, 0.957, 1.367), (0.2, 0.969, 1.212), (0.1, 0.983, 1.093), (0, 1, 1)]
+
+        for Rr, alpha, beta in table_data:
+            database_dict["alpha"].append(alpha)
+            database_dict["beta"].append(beta)
+            database_dict["Rr"].append(Rr)
+            database_dict["alpha_diff"].append((alpha - reference_value) if (alpha - reference_value) >= 0 else (alpha - reference_value) * (-1))
+            database_dict["beta_diff"].append((beta - reference_value) if (beta - reference_value) >= 0 else (beta - reference_value) * (-1))
+            database_dict["Rr_diff"].append((Rr - reference_value) if (Rr - reference_value) >= 0 else (Rr - reference_value) * (-1))
+
+
+        if (reference_value >= min(database_dict[selected_dropdown_option])) and (reference_value <= max(database_dict[selected_dropdown_option])):
+
+            interpolation_indexes = []
+            i = 0
+            while i <= 1:
+                value = min(database_dict[selected_dropdown_option + "_diff"])
+                index = database_dict[selected_dropdown_option + "_diff"].index(value)
+                interpolation_indexes.append(index)
+                database_dict[selected_dropdown_option + "_diff"][index] += 100
+                i += 1
+
+            parameters_for_interpolation = [key for key in database_dict.keys() if ((selected_dropdown_option not in key) and ("diff" not in key))]
+
+            interpolation_results = {}
+            i0, i1 = interpolation_indexes
+            for parameter in parameters_for_interpolation:
+
+                #  Interpolation Equation: y = y0 + (x-x0)*((y1-y0)/(x1-x0))
+                interpolation_results[parameter] = database_dict[parameter][i0] + (
+                    reference_value - database_dict[selected_dropdown_option][i0]) * (
+                        (database_dict[parameter][i1] - database_dict[parameter][i0]) / (
+                            database_dict[selected_dropdown_option][i1] - database_dict[selected_dropdown_option][i0]))
             
-            F = Padm*(pi/4)*((D**2)-(d**2))
-            T = ((pi*µ*Padm*NS)/12)*((D**3)-(d**3))
+            self.interpolation_results = interpolation_results
+            return interpolation_results
 
-        if self.seleccion.get() == 2:
+    def operacionesPadm(self):
+        R = float(self.textos[0].get())
+        r = float(self.textos[1].get())
+        Padm = float(self.textos[2].get())
+        µ = float(self.textos[3].get())
 
-            F = Padm*((pi*d)/2)*(D-d)
-            T = ((pi*d*µ*Padm*NS)/8)*((D**2)-(d**2))
-        
+        Interpolation_string = "Rr"
+        Rr = R/r
+        self._interpolation(Interpolation_string,Rr)
+        alpha = self.interpolation_results["alpha"]
+        beta = self.interpolation_results["beta"]
+
+        Pprom = alpha*Padm
+        F = pi*(R**2)*Pprom
+        T = µ*F*beta*r        
+
+
         self.textos2[0].delete(0,"end")
         self.textos2[0].insert(0,F)
 
         self.textos2[1].delete(0,"end")
         self.textos2[1].insert(0,T)
 
+
     def operacionesT(self):
-        pass
         D = float(self.textos[0].get())
         d = float(self.textos[1].get())
-        µ = float(self.textos[2].get())
-        T = float(self.textos[3].get())
-        NS = float(self.textos[4].get())
+        α = float(self.textos[2].get())
+        µ = float(self.textos[3].get())
+        T = float(self.textos[4].get())
 
         if self.seleccion.get() == 1:
 
-            Padm = (12*T)/(pi*µ*NS*((D**3)-(d**3)))
-            F = Padm*(pi/4)*((D**2)-(d**2))
+            Padm = (12*T*sin(radians(α)))/(pi*µ*((D**3)-(d**3)))
+            F = (pi/4)*Padm*((D**2)-(d**2))          
 
         if self.seleccion.get() == 2:
 
-            Padm = (8*T)/(pi*d*µ*NS*((D**2)-(d**2)))
-            F = Padm*((pi*d)/2)*(D-d)
+            Padm = (8*T*sin(radians(α)))/(pi*d*µ*((D**2)-(d**2)))
+            F = (pi/2)*d*Padm*(D-d)
 
         self.textos2[0].delete(0,"end")
         self.textos2[0].insert(0,Padm)
@@ -100,19 +152,19 @@ FD: Factor de diseño"""
     def operacionesF(self):
         D = float(self.textos[0].get())
         d = float(self.textos[1].get())
-        µ = float(self.textos[2].get())
-        F = float(self.textos[3].get())
-        NS = float(self.textos[4].get())
+        α = float(self.textos[2].get())
+        µ = float(self.textos[3].get())
+        F = float(self.textos[4].get())
 
         if self.seleccion.get() == 1:
 
             Padm = (4*F)/(pi*((D**2)-(d**2)))
-            T = ((pi*µ*Padm*NS)/12)*((D**3)-(d**3))
+            T = ((pi*µ*Padm)/(12*sin(radians(α))))*(((D**3)-(d**3)))
 
         if self.seleccion.get() == 2:
 
             Padm = (2*F)/(pi*d*(D-d))
-            T = ((pi*d*µ*Padm*NS)/8)*((D**2)-(d**2))
+            T = ((pi*d*µ*Padm)/(8*sin(radians(α))))*(((D**2)-(d**2)))
         
         self.textos2[0].delete(0,"end")
         self.textos2[0].insert(0,Padm)
@@ -123,16 +175,8 @@ FD: Factor de diseño"""
 
     def create_widget(self):
 
-        self.seleccion = IntVar()
-        self.seleccion.set(1)
-        self.radio1 = Radiobutton(self, text="Presion uniforme", variable=self.seleccion, value=1)
-        self.radio2 = Radiobutton(self, text="Desgaste uniforme", variable=self.seleccion, value=2)
-
-        self.radio1.place(x=20, y=10)
-        self.radio2.place(x=20, y=30)
-
         self.labels = []
-        textoslbl = ["D","d","µ","F","NS"]
+        textoslbl = ["R","r'","Padm","µ"]
         for textos in textoslbl:
             self.labels.append(Label(self, text=textos))
         i=70
@@ -141,7 +185,7 @@ FD: Factor de diseño"""
             i += 30
         
         self.textos = []
-        for texto in range(0,5):
+        for texto in range(0,4):
             self.textos.append(Entry(self))
         i=70
         for parameters in self.textos:
@@ -149,7 +193,7 @@ FD: Factor de diseño"""
             i += 30
 
         self.listunds = []
-        unds = ["m","m","","N",""]
+        unds = ["m","m","Pa",""]
         for unidades in unds:
             self.listunds.append(Label(self))
         i=70
@@ -158,7 +202,7 @@ FD: Factor de diseño"""
             i += 30
 
         self.labels2 = []
-        textoslabels2 = ["Padm","T","FD"]
+        textoslabels2 = ["F","T","FD"]
         for textos in textoslabels2:
             self.labels2.append(Label(self, text=textos))
         i=270
@@ -175,7 +219,7 @@ FD: Factor de diseño"""
             i += 30
 
         self.listunds2 = []
-        unds2 = ["Pa","N.m"]
+        unds2 = ["N","N.m",""]
         for unidades in unds2:
             self.listunds2.append(Label(self))
         i=270
@@ -184,21 +228,21 @@ FD: Factor de diseño"""
             i += 30
 
         self.base_path = pathlib.Path(__file__).parent.resolve()
-        self.image_filename ='images\\Freno Disco.png'
+        self.image_filename ='images\\Freno Zapata Circular.png'
         self.image = Image.open(os.path.join(self.base_path, self.image_filename))
-        self.image = self.image.resize((250,250), Image.Resampling.LANCZOS)
+        self.image = self.image.resize((300,250), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)
         self.lbl17 = Label(self, image=self.img)
-        self.lbl17.place(x=410, y=10, height=250, width=250)
+        self.lbl17.place(x=390, y=10, height=250, width=300)
 
-        self.boton1 = Button(self, text="Solve", command=self.operacionesF)
+        self.boton1 = Button(self, text="Solve", command=self.operacionesPadm)
         self.boton1.place(x=450, y=300, width=100, height=80)
 
         self.lblSU = Label(self, text="Sistema de unidades")
         self.lblSU.place(x=215, y=15, width=120, height=20)
 
-        Internacional = ["m","m","","N","","Pa","N.m"]
-        Ingles = ["in","in","","lb","","PSI","lb.in"]
+        Internacional = ["m","m","Pa","","N","N.m",""]
+        Ingles = ["in","in","PSI","","lb","lb.in",""]
 
         self.listaUnds = ["Sistema Internacional","Sistema Ingles"]
         self.list2 = Combobox(self, width=20, values=self.listaUnds, state="readonly")
@@ -230,57 +274,57 @@ FD: Factor de diseño"""
         def callback(event):
             if self.list.get() == self.opciones[0]:
                 if self.list2.get() == self.listaUnds[0]:
-                    self.labels[3].config(text="F")
+                    self.labels[4].config(text="F")
                     self.labels2[0].config(text="Padm")
                     self.labels2[1].config(text="T")
-                    self.listunds[3].config(text="N")
+                    self.listunds[4].config(text="N")
                     self.listunds2[0].config(text="Pa")
                     self.listunds2[1].config(text="N.m")
                     self.boton1.config(command=self.operacionesF)
                 if self.list2.get() == self.listaUnds[1]:
-                    self.labels[3].config(text="F")
+                    self.labels[4].config(text="F")
                     self.labels2[0].config(text="Padm")
                     self.labels2[1].config(text="T")
-                    self.listunds[3].config(text="lb")
+                    self.listunds[4].config(text="lb")
                     self.listunds2[0].config(text="PSI")
                     self.listunds2[1].config(text="lb.in")
                     self.boton1.config(command=self.operacionesF)
             elif self.list.get() == self.opciones[1]:
                 if self.list2.get() == self.listaUnds[0]:
-                    self.labels[3].config(text="T")
+                    self.labels[4].config(text="T")
                     self.labels2[0].config(text="Padm")
                     self.labels2[1].config(text="F")
-                    self.listunds[3].config(text="N.m")
+                    self.listunds[4].config(text="N.m")
                     self.listunds2[0].config(text="Pa")
                     self.listunds2[1].config(text="N")
                     self.boton1.config(command=self.operacionesT)
                 if self.list2.get() == self.listaUnds[1]:
-                    self.labels[3].config(text="T")
+                    self.labels[4].config(text="T")
                     self.labels2[0].config(text="Padm")
                     self.labels2[1].config(text="F")
-                    self.listunds[3].config(text="lb.in")
+                    self.listunds[4].config(text="lb.in")
                     self.listunds2[0].config(text="PSI")
                     self.listunds2[1].config(text="lb")
                     self.boton1.config(command=self.operacionesT)
             elif self.list.get() == self.opciones[2]:
                 if self.list2.get() == self.listaUnds[0]:
-                    self.labels[3].config(text="Padm")
+                    self.labels[4].config(text="Padm")
                     self.labels2[0].config(text="T")
                     self.labels2[1].config(text="F")
-                    self.listunds[3].config(text="Pa")
+                    self.listunds[4].config(text="Pa")
                     self.listunds2[0].config(text="N.m")
                     self.listunds2[1].config(text="N")
                     self.boton1.config(command=self.operacionesPadm)
                 if self.list2.get() == self.listaUnds[1]:
-                    self.labels[3].config(text="Padm")
+                    self.labels[4].config(text="Padm")
                     self.labels2[0].config(text="T")
                     self.labels2[1].config(text="F")
-                    self.listunds[3].config(text="PSI")
+                    self.listunds[4].config(text="PSI")
                     self.listunds2[0].config(text="lb.in")
                     self.listunds2[1].config(text="lb")
                     self.boton1.config(command=self.operacionesPadm)
         self.list.bind('<<ComboboxSelected>>', callback)
-        self.list.current(0)
+        self.list.current(2)
 
         self.list.place(x=215, y=70)
 
@@ -301,4 +345,4 @@ FD: Factor de diseño"""
 if __name__ == "__main__":
     root = Tk()
     root.wm_title("Frenos de tambor con zapata interna")
-    DiscoWindow(root).mainloop()
+    CircularWindow(root).mainloop()
