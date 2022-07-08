@@ -240,7 +240,7 @@ FD: Factor de diseño"""
         
         self.textos = []
         for texto in range(0,11):
-            self.textos.append(Entry(self))
+            self.textos.append(Entry(self, state="disabled"))
         i=80
         for parameters in self.textos:
             parameters.place(x=70, y=i, width=80)
@@ -266,7 +266,7 @@ FD: Factor de diseño"""
 
         self.textos2 = []
         for texto in range(0,5):
-            self.textos2.append(Entry(self))
+            self.textos2.append(Entry(self, state="disabled"))
         i=450
         for parameters in self.textos2:
             parameters.place(x=70, y=i, width=80)
@@ -310,6 +310,10 @@ FD: Factor de diseño"""
                     lbl.config(text=Internacional[i])
                     i += 1
                 self.list["state"]="readonly"
+                for entries in self.textos:
+                    entries.config(state=NORMAL)
+                for entries in self.textos2:
+                    entries.config(state=NORMAL)
             if self.list2.get() == self.listaUnds[1]:
                 i=0
                 for lbl in self.listunds:
@@ -319,6 +323,10 @@ FD: Factor de diseño"""
                     lbl.config(text=Ingles[i])
                     i += 1
                 self.list["state"]="readonly"
+                for entries in self.textos:
+                    entries.config(state=NORMAL)
+                for entries in self.textos2:
+                    entries.config(state=NORMAL)
         self.list2.bind('<<ComboboxSelected>>', cambioUnds)
 
         self.list2.place(x=215, y=35)

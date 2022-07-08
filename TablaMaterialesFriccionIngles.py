@@ -71,7 +71,7 @@ class TablaMaterialesIngles(Frame):
         def selectItem(event):
             curItem = self.table.focus()
             sas = self.table.item(curItem)
-            a12 = sas.get("values")[1]
+            a12 = sas.get("values")[5]
             self.txttabla.delete(0,"end")
             self.txttabla.insert(0,a12)
             material = sas.get("text")
@@ -92,6 +92,10 @@ class TablaMaterialesIngles(Frame):
             self.parent.txt18.delete(0,"end")
             self.parent.txt18.insert(0, mawp)
             self.parent.lbl36.config(text=material)
+            if float(self.parent.txt18.get()) > float(self.parent.textos6[1].get()):
+                self.parent.cumple_si_no.config(text="Cumple")
+            else:
+                self.parent.cumple_si_no.config(text="No cumple")
             if mawp:
                 self.master.destroy()
                 return mawp 

@@ -43,8 +43,8 @@ FD: Factor de diseño"""
             Pa = float(self.txt18.get())*1000
         else:
             Pa = float(self.txt18.get())
-        if self.list.get() == self.opciones[2]:
-            Fdiseño = Pa/float(self.textos[3].get())
+        if self.list.get() == self.opciones[1]:
+            Fdiseño = Pa/float(self.textos[0].get())
             self.textos2[4].delete(0,"end")
             self.textos2[4].insert(0,Fdiseño)
         else:
@@ -53,10 +53,10 @@ FD: Factor de diseño"""
             self.textos2[4].insert(0,Fdiseño)
 
     def operacionesPadm(self):
-        r = float(self.textos[0].get())
+        r = float(self.textos[3].get())
         µ = float(self.textos[1].get())
         b = float(self.textos[2].get())
-        Padm = float(self.textos[3].get())
+        Padm = float(self.textos[0].get())
         Θ2 = float(self.textos[4].get())
             
         a = (4*r*(sin(radians(Θ2))))/(2*radians(Θ2)+(sin(radians(2*Θ2))))
@@ -85,55 +85,38 @@ FD: Factor de diseño"""
         self.textos2[3].delete(0,"end")
         self.textos2[3].insert(0,T)
 
-    # def operacionesT(self):
-    #     a1 = float(self.txt1.get())
-    #     a2 = float(self.txt2.get())
-    #     a3 = float(self.txt3.get())
-    #     a4 = float(self.txt4.get())
-    #     a5 = float(self.txt5.get())
-    #     a6 = float(self.txt6.get())
-    #     a7 = float(self.txt7.get())
-    #     a8 = float(self.txt8.get())
-    #     a9 = float(self.txt9.get())
-    #     a10 = float(self.txt10.get())
-    #     a11 = float(self.txt11.get())
+    def operacionesT(self):
+        r = float(self.textos[3].get())
+        µ = float(self.textos[1].get())
+        b = float(self.textos[2].get())
+        T = float(self.textos[0].get())
+        Θ2 = float(self.textos[4].get())
 
-    #     I1 = -cos(a8*(3.14/180)) + cos(a7*(3.14/180))
-    #     I2 = 0.5*(sin(a8*(3.14/180))**2) - 0.5*(sin(a7*(3.14/180))**2)
-    #     I3 = ((a8/2)*(3.14/180))-0.25*sin(2*((a8)*(3.14/180))) - (((a7/2)*(3.14/180))-0.25*sin(2*((a7)*(3.14/180))))
+        a = (4*r*(sin(radians(Θ2))))/(2*radians(Θ2)+(sin(radians(2*Θ2))))
+        a = round(a,3)
 
-    #     Padm = (a1*sin(a9*(3.14/180)))/(a2*a6*((a5/2)**2)*I1)
+        N = T/(a*µ)
 
-    #     Mn = (Padm*a6*a3*(a5/2)/(sin(a9*(pi/180))))*I3
-    #     Mf = (a2*Padm*a6*(a5/2)/(sin(a9*(3.14/180))))*((a5/2)*I1 - a3*I2)
+        Padm = N/(2*b*r*(sin(radians(Θ2))))
+        Padm = round(Padm,3)
 
-    #     if self.seleccion.get() == 1:
+        Rx = ((Padm*b*r)/2)*(2*radians(Θ2)+(sin(2*radians(Θ2))))
+        Rx = round(Rx,3)
 
-    #         F = (Mn-Mf)/a4
-    #         F = round(F,3)
-
-    #         Rx = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I2-(a2*I3))) - a10
-    #         Ry = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3-(a2*I2))) + a11
-
-    #     if self.seleccion.get() == 2:
-
-    #         F = (Mn+Mf)/a4
-    #         F = round(F,3)
-
-    #         Rx = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I2+(a2*I3))) - a10
-    #         Ry = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3+(a2*I2))) + a11
+        Ry = ((µ*Padm*b*r)/2)*(2*radians(Θ2)+(sin(2*radians(Θ2))))
+        Ry = round(Ry,3)
         
-    #     self.textos2[0].delete(0,"end")
-    #     self.textos2[0].insert(0,Rx)
+        self.textos2[0].delete(0,"end")
+        self.textos2[0].insert(0,a)
 
-    #     self.textos2[1].delete(0,"end")
-    #     self.textos2[1].insert(0,Ry)
+        self.textos2[1].delete(0,"end")
+        self.textos2[1].insert(0,Rx)
+        
+        self.textos2[2].delete(0,"end")
+        self.textos2[2].insert(0,Ry)
 
-    #     self.textos2[3].delete(0,"end")
-    #     self.textos2[3].insert(0,Padm)
-
-    #     self.textos2[2].delete(0,"end")
-    #     self.textos2[2].insert(0,F)
+        self.textos2[3].delete(0,"end")
+        self.textos2[3].insert(0,Padm)
 
     # def operacionesF(self):
     #     a1 = float(self.textos[0].get())
@@ -192,18 +175,8 @@ FD: Factor de diseño"""
 
     def create_widget(self):
 
-        # self.seleccion = IntVar()
-        # self.seleccion.set(1)
-        # self.radio1 = Radiobutton(self, text="Autoenergizante", variable=self.seleccion, value=1)
-        # self.radio2 = Radiobutton(self, text="Autodesenergizante", variable=self.seleccion, value=2)
-        # #self.radio3 = Radiobutton(self, text="Pivote simetrico", variable=self.seleccion, value=3)
-
-        # self.radio1.place(x=20, y=10)
-        # self.radio2.place(x=20, y=30)
-        # #self.radio3.place(x=20, y=50)
-
         self.labels = []
-        textoslbl = ["r","µ","b","Padm","Θ2"]
+        textoslbl = ["Padm","µ","b","r","Θ2"]
         for textos in textoslbl:
             self.labels.append(Label(self, text=textos))
         i=80
@@ -213,14 +186,14 @@ FD: Factor de diseño"""
         
         self.textos = []
         for texto in range(0,5):
-            self.textos.append(Entry(self))
+            self.textos.append(Entry(self, state="disabled"))
         i=80
         for parameters in self.textos:
             parameters.place(x=70, y=i, width=80)
             i += 30
 
         self.listunds = []
-        unds = ["m","","m","Pa","°"]
+        unds = ["Pa","","m","m","°"]
         for unidades in unds:
             self.listunds.append(Label(self))
         i=80
@@ -239,7 +212,7 @@ FD: Factor de diseño"""
 
         self.textos2 = []
         for texto in range(0,5):
-            self.textos2.append(Entry(self))
+            self.textos2.append(Entry(self, state="disabled"))
         i=450
         for parameters in self.textos2:
             parameters.place(x=70, y=i, width=80)
@@ -268,8 +241,8 @@ FD: Factor de diseño"""
         self.lblSU = Label(self, text="Sistema de unidades")
         self.lblSU.place(x=215, y=15, width=120, height=20)
 
-        Internacional = ["m","","m","Pa","°","m","N","N","N.m",""]
-        Ingles = ["in","","in","PSI","°","in","lb","lb","lb.in",""]
+        Internacional = ["Pa","","m","m","°","m","N","N","N.m",""]
+        Ingles = ["PSI","","in","in","°","in","lb","lb","lb.in",""]
 
         self.listaUnds = ["Sistema Internacional","Sistema Ingles"]
         self.list2 = Combobox(self, width=20, values=self.listaUnds, state="readonly")
@@ -283,6 +256,10 @@ FD: Factor de diseño"""
                     lbl.config(text=Internacional[i])
                     i += 1
                 self.list["state"]="readonly"
+                for entries in self.textos:
+                    entries.config(state=NORMAL)
+                for entries in self.textos2:
+                    entries.config(state=NORMAL)
             if self.list2.get() == self.listaUnds[1]:
                 i=0
                 for lbl in self.listunds:
@@ -292,66 +269,62 @@ FD: Factor de diseño"""
                     lbl.config(text=Ingles[i])
                     i += 1
                 self.list["state"]="readonly"
+                for entries in self.textos:
+                    entries.config(state=NORMAL)
+                for entries in self.textos2:
+                    entries.config(state=NORMAL)
         self.list2.bind('<<ComboboxSelected>>', cambioUnds)
 
         self.list2.place(x=215, y=35)
 
-        self.opciones = ["Dada F, hallar T y Padm", "Dada T, hallar F y Padm", "Dada Padm, hallar F y T"]
+        self.opciones = ["Dada T, hallar F y Padm", "Dada Padm, hallar F y T"]
         self.list = Combobox(self, width=25, values=self.opciones, state="disabled")
         def callback(event):
             if self.list.get() == self.opciones[0]:
                 if self.list2.get() == self.listaUnds[0]:
-                    self.labels[0].config(text="F")
-                    self.labels2[2].config(text="T")
-                    self.labels2[3].config(text="Padm")
-                    self.listunds[0].config(text="N")
-                    self.listunds2[2].config(text="N.m")
-                    self.listunds2[3].config(text="Pa")
-                    self.boton1.config(command=self.operacionesF)
-                if self.list2.get() == self.listaUnds[1]:
-                    self.labels[0].config(text="F")
-                    self.labels2[2].config(text="T")
-                    self.labels2[3].config(text="Padm")
-                    self.listunds[0].config(text="lb")
-                    self.listunds2[2].config(text="lb.in")
-                    self.listunds2[3].config(text="PSI")
-                    self.boton1.config(command=self.operacionesF)
-            elif self.list.get() == self.opciones[1]:
-                if self.list2.get() == self.listaUnds[0]:
                     self.labels[0].config(text="T")
-                    self.labels2[2].config(text="F")
                     self.labels2[3].config(text="Padm")
                     self.listunds[0].config(text="N.m")
-                    self.listunds2[2].config(text="N")
                     self.listunds2[3].config(text="Pa")
                     self.boton1.config(command=self.operacionesT)
                 if self.list2.get() == self.listaUnds[1]:
                     self.labels[0].config(text="T")
-                    self.labels2[2].config(text="F")
                     self.labels2[3].config(text="Padm")
                     self.listunds[0].config(text="lb.in")
-                    self.listunds2[2].config(text="lb")
                     self.listunds2[3].config(text="PSI")
                     self.boton1.config(command=self.operacionesT)
-            elif self.list.get() == self.opciones[2]:
+            elif self.list.get() == self.opciones[1]:
                 if self.list2.get() == self.listaUnds[0]:
                     self.labels[0].config(text="Padm")
-                    self.labels2[2].config(text="T")
-                    self.labels2[3].config(text="F")
+                    self.labels2[3].config(text="T")
                     self.listunds[0].config(text="Pa")
-                    self.listunds2[2].config(text="N.m")
-                    self.listunds2[3].config(text="N")
+                    self.listunds2[3].config(text="N.m")
                     self.boton1.config(command=self.operacionesPadm)
                 if self.list2.get() == self.listaUnds[1]:
                     self.labels[0].config(text="Padm")
-                    self.labels2[2].config(text="T")
-                    self.labels2[3].config(text="F")
+                    self.labels2[3].config(text="T")
                     self.listunds[0].config(text="PSI")
-                    self.listunds2[2].config(text="lb.in")
-                    self.listunds2[3].config(text="lb")
+                    self.listunds2[3].config(text="lb.in")
                     self.boton1.config(command=self.operacionesPadm)
+            # elif self.list.get() == self.opciones[2]:
+            #     if self.list2.get() == self.listaUnds[0]:
+            #         self.labels[0].config(text="Padm")
+            #         self.labels2[2].config(text="T")
+            #         self.labels2[3].config(text="F")
+            #         self.listunds[0].config(text="Pa")
+            #         self.listunds2[2].config(text="N.m")
+            #         self.listunds2[3].config(text="N")
+            #         self.boton1.config(command=self.operacionesPadm)
+            #     if self.list2.get() == self.listaUnds[1]:
+            #         self.labels[0].config(text="Padm")
+            #         self.labels2[2].config(text="T")
+            #         self.labels2[3].config(text="F")
+            #         self.listunds[0].config(text="PSI")
+            #         self.listunds2[2].config(text="lb.in")
+            #         self.listunds2[3].config(text="lb")
+            #         self.boton1.config(command=self.operacionesPadm)
         self.list.bind('<<ComboboxSelected>>', callback)
-        self.list.current(0)
+        self.list.current(1)
 
         self.list.place(x=215, y=70)
 

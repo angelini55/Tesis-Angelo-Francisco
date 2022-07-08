@@ -41,7 +41,7 @@ FD: Factor de diseño"""
         else:
             Pa = float(self.txt18.get())
         if self.list.get() == self.opciones[2]:
-            Fdiseño = Pa/float(self.textos[2].get())
+            Fdiseño = Pa/float(self.textos[0].get())
             self.textos2[2].delete(0,"end")
             self.textos2[2].insert(0,Fdiseño)
         else:
@@ -102,10 +102,10 @@ FD: Factor de diseño"""
             self.interpolation_results = interpolation_results
             return interpolation_results
 
-    def operacionesPadm(self):
-        R = float(self.textos[0].get())
+    def operacionesPadm_Rr(self):
+        R = float(self.textos[2].get())
         r = float(self.textos[1].get())
-        Padm = float(self.textos[2].get())
+        Padm = float(self.textos[0].get())
         µ = float(self.textos[3].get())
 
         Interpolation_string = "Rr"
@@ -126,7 +126,7 @@ FD: Factor de diseño"""
         self.textos2[1].insert(0,T)
 
 
-    def operacionesT(self):
+    def operacionesPadm_alpha(self):
         D = float(self.textos[0].get())
         d = float(self.textos[1].get())
         α = float(self.textos[2].get())
@@ -176,7 +176,7 @@ FD: Factor de diseño"""
     def create_widget(self):
 
         self.labels = []
-        textoslbl = ["R","r'","Padm","µ"]
+        textoslbl = ["Padm","r'","R","µ"]
         for textos in textoslbl:
             self.labels.append(Label(self, text=textos))
         i=70
@@ -186,14 +186,14 @@ FD: Factor de diseño"""
         
         self.textos = []
         for texto in range(0,4):
-            self.textos.append(Entry(self))
+            self.textos.append(Entry(self, state="disabled"))
         i=70
         for parameters in self.textos:
             parameters.place(x=70, y=i, width=80)
             i += 30
 
         self.listunds = []
-        unds = ["m","m","Pa",""]
+        unds = ["Pa","m","m",""]
         for unidades in unds:
             self.listunds.append(Label(self))
         i=70
@@ -212,7 +212,7 @@ FD: Factor de diseño"""
 
         self.textos2 = []
         for texto in range(0,3):
-            self.textos2.append(Entry(self))
+            self.textos2.append(Entry(self, state="disabled"))
         i=270
         for parameters in self.textos2:
             parameters.place(x=70, y=i, width=80)
@@ -235,14 +235,14 @@ FD: Factor de diseño"""
         self.lbl17 = Label(self, image=self.img)
         self.lbl17.place(x=390, y=10, height=250, width=300)
 
-        self.boton1 = Button(self, text="Solve", command=self.operacionesPadm)
+        self.boton1 = Button(self, text="Solve", command=self.operacionesPadm_Rr)
         self.boton1.place(x=450, y=300, width=100, height=80)
 
         self.lblSU = Label(self, text="Sistema de unidades")
         self.lblSU.place(x=215, y=15, width=120, height=20)
 
-        Internacional = ["m","m","Pa","","N","N.m",""]
-        Ingles = ["in","in","PSI","","lb","lb.in",""]
+        Internacional = ["Pa","m","m","","N","N.m",""]
+        Ingles = ["PSI","in","in","","lb","lb.in",""]
 
         self.listaUnds = ["Sistema Internacional","Sistema Ingles"]
         self.list2 = Combobox(self, width=20, values=self.listaUnds, state="readonly")
@@ -256,6 +256,10 @@ FD: Factor de diseño"""
                     lbl.config(text=Internacional[i])
                     i += 1
                 self.list["state"]="readonly"
+                for entries in self.textos:
+                    entries.config(state=NORMAL)
+                for entries in self.textos2:
+                    entries.config(state=NORMAL)
             if self.list2.get() == self.listaUnds[1]:
                 i=0
                 for lbl in self.listunds:
@@ -265,6 +269,10 @@ FD: Factor de diseño"""
                     lbl.config(text=Ingles[i])
                     i += 1
                 self.list["state"]="readonly"
+                for entries in self.textos:
+                    entries.config(state=NORMAL)
+                for entries in self.textos2:
+                    entries.config(state=NORMAL)
         self.list2.bind('<<ComboboxSelected>>', cambioUnds)
 
         self.list2.place(x=215, y=35)
@@ -274,52 +282,52 @@ FD: Factor de diseño"""
         def callback(event):
             if self.list.get() == self.opciones[0]:
                 if self.list2.get() == self.listaUnds[0]:
-                    self.labels[4].config(text="F")
+                    self.labels[0].config(text="F")
                     self.labels2[0].config(text="Padm")
                     self.labels2[1].config(text="T")
-                    self.listunds[4].config(text="N")
+                    self.listunds[0].config(text="N")
                     self.listunds2[0].config(text="Pa")
                     self.listunds2[1].config(text="N.m")
                     self.boton1.config(command=self.operacionesF)
                 if self.list2.get() == self.listaUnds[1]:
-                    self.labels[4].config(text="F")
+                    self.labels[0].config(text="F")
                     self.labels2[0].config(text="Padm")
                     self.labels2[1].config(text="T")
-                    self.listunds[4].config(text="lb")
+                    self.listunds[0].config(text="lb")
                     self.listunds2[0].config(text="PSI")
                     self.listunds2[1].config(text="lb.in")
                     self.boton1.config(command=self.operacionesF)
             elif self.list.get() == self.opciones[1]:
                 if self.list2.get() == self.listaUnds[0]:
-                    self.labels[4].config(text="T")
+                    self.labels[0].config(text="T")
                     self.labels2[0].config(text="Padm")
                     self.labels2[1].config(text="F")
-                    self.listunds[4].config(text="N.m")
+                    self.listunds[0].config(text="N.m")
                     self.listunds2[0].config(text="Pa")
                     self.listunds2[1].config(text="N")
                     self.boton1.config(command=self.operacionesT)
                 if self.list2.get() == self.listaUnds[1]:
-                    self.labels[4].config(text="T")
+                    self.labels[0].config(text="T")
                     self.labels2[0].config(text="Padm")
                     self.labels2[1].config(text="F")
-                    self.listunds[4].config(text="lb.in")
+                    self.listunds[0].config(text="lb.in")
                     self.listunds2[0].config(text="PSI")
                     self.listunds2[1].config(text="lb")
                     self.boton1.config(command=self.operacionesT)
             elif self.list.get() == self.opciones[2]:
                 if self.list2.get() == self.listaUnds[0]:
-                    self.labels[4].config(text="Padm")
+                    self.labels[0].config(text="Padm")
                     self.labels2[0].config(text="T")
                     self.labels2[1].config(text="F")
-                    self.listunds[4].config(text="Pa")
+                    self.listunds[0].config(text="Pa")
                     self.listunds2[0].config(text="N.m")
                     self.listunds2[1].config(text="N")
                     self.boton1.config(command=self.operacionesPadm)
                 if self.list2.get() == self.listaUnds[1]:
-                    self.labels[4].config(text="Padm")
+                    self.labels[0].config(text="Padm")
                     self.labels2[0].config(text="T")
                     self.labels2[1].config(text="F")
-                    self.listunds[4].config(text="PSI")
+                    self.listunds[0].config(text="PSI")
                     self.listunds2[0].config(text="lb.in")
                     self.listunds2[1].config(text="lb")
                     self.boton1.config(command=self.operacionesPadm)
