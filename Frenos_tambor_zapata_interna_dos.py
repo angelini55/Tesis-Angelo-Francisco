@@ -8,7 +8,8 @@ from tkinter import ttk
 from math import *
 from PIL import ImageTk, Image
 
-class ZapataExternaWindow(Frame):
+
+class ZapataInternaWindow(Frame):
 
     def __init__(self, master=None):
         super().__init__(master, width=1400, height=730)
@@ -134,119 +135,6 @@ class ZapataExternaWindow(Frame):
         self.FSt =FSt
         return FSt
 
-    def operacionesPadm(self):
-        a1 = float(self.textos[0].get())
-        a2 = float(self.textos[1].get())
-        a3 = float(self.textos[2].get())
-        a4 = float(self.textos[3].get())
-        a5 = float(self.textos[4].get())
-        a6 = float(self.textos[5].get())
-        a7 = float(self.textos[6].get())
-        a8 = float(self.textos[7].get())
-        y = float(self.textos[8].get())
-        x = float(self.textos[9].get())
-        Pa = float(self.txt18.get())
-
-        if a8 <= 90:
-            a9 = a8
-        if a8 > 90:
-            a9 = 90
-
-        I1 = -cos(a8*(3.14/180)) + cos(a7*(3.14/180))
-        I2 = 0.5*(sin(a8*(3.14/180))**2) - 0.5*(sin(a7*(3.14/180))**2)
-        I3 = ((a8/2)*(3.14/180))-0.25*sin(2*((a8)*(3.14/180))) - (((a7/2)*(3.14/180))-0.25*sin(2*((a7)*(3.14/180))))
-
-        Mn = (a1*a6*a3*(a5/2)/(sin(a9*(3.14/180))))*I3
-        Mf = (a2*a1*a6*(a5/2)/(sin(a9*(3.14/180))))*((a5/2)*I1 - a3*I2)
-
-        Θ3 = atan(x/y)
-        
-        if self.list_sentido_fuerza.get() == "hacia la derecha":
-            self.sentido_fuerza = +1
-        if self.list_sentido_fuerza.get() == "hacia la izquierda":
-            self.sentido_fuerza = -1
-        if self.list_sentido_giro.get() == "horario":
-            self.sentido_giro = +1
-        if self.list_sentido_giro.get() == "antihorario":
-            self.sentido_giro = -1
-        self.result = self.sentido_fuerza*self.sentido_giro
-        if self.result == 1:
-            self.label_ener_desener.config(text="Autoenergizante")
-        if self.result == -1:
-            self.label_ener_desener.config(text="Autodesenergizante")
-
-        if self.result == 1:
-            
-            F = (Mn-Mf)/a4
-            F = round(F,3)
-
-            T = (a2*a1*a6*((a5/2)**2)*I1)/(sin(a9*(3.14/180)))
-            T = round(T,3)
-
-            Fx = F*sin(Θ3)
-            Fx = round(Fx,3)
-            Fy = F*cos(Θ3)
-            Fy = round(Fy,3)
-
-            Rx = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(I2-(a2*I3))) - Fx
-            Ry = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3-(a2*I2))) + Fy
-
-        if self.result == -1:
-
-            F = (Mn+Mf)/a4
-            F = round(F,3)
-
-            T = (a2*a1*a6*((a5/2)**2)*I1)/(sin(a9*(3.14/180)))
-            T = round(T,3)
-
-            Fx = F*sin(Θ3)
-            Fx = round(Fx,3)
-            Fy = F*cos(Θ3)
-            Fy = round(Fy,3)
-
-            Rx = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(I2+(a2*I3))) - Fx
-            Ry = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3+(a2*I2))) + Fy
-
-        R = sqrt((Rx**2)+(Ry**2))
-
-        if  self.textos[10].get() and self.textos[11].get() and self.textos[12].get():
-            self.Calc_pasadores(R)
-            FSp = self.FSp
-            self.textos2[8].delete(0,"end")
-            self.textos2[8].insert(0,FSp)
-
-        if self.textos[13].get() and self.textos[15].get() and self.textos[16].get():
-            self.Calc_tambor(a5,a1)
-            FSt = self.FSt
-            self.textos2[9].delete(0,"end")
-            self.textos2[9].insert(0,FSt)
-        FD = Pa/a1
-
-        self.textos2[2].delete(0,"end")
-        self.textos2[2].insert(0,F)
-
-        self.textos2[1].delete(0,"end")
-        self.textos2[1].insert(0,T)
-
-        self.textos2[0].delete(0,"end")
-        self.textos2[0].insert(0,a9)
-
-        self.textos2[3].delete(0,"end")
-        self.textos2[3].insert(0,Fx)
-        self.textos2[4].delete(0,"end")
-        self.textos2[4].insert(0,Fy)
-
-        self.textos2[5].delete(0,"end")
-        self.textos2[5].insert(0,Rx)
-        self.textos2[6].delete(0,"end")
-        self.textos2[6].insert(0,Ry)
-
-        self.textos2[7].delete(0,"end")
-        self.textos2[7].insert(0,R)
-
-        self.textos2[10].delete(0,"end")
-        self.textos2[10].insert(0,FD)
-
     def operacionesT(self):
         a1 = float(self.textos[0].get())
         a2 = float(self.textos[1].get())
@@ -291,7 +179,6 @@ class ZapataExternaWindow(Frame):
             self.label_ener_desener.config(text="Autodesenergizante")
 
         if self.result == 1:
-
             F = (Mn-Mf)/a4
             F = round(F,3)
 
@@ -301,10 +188,9 @@ class ZapataExternaWindow(Frame):
             Fy = round(Fy,3)
 
             Rx = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I2-(a2*I3))) - Fx
-            Ry = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3-(a2*I2))) + Fy
-
+            Ry = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I3+(a2*I2))) - Fy
+        
         if self.result == -1:
-
             F = (Mn+Mf)/a4
             F = round(F,3)
 
@@ -314,7 +200,7 @@ class ZapataExternaWindow(Frame):
             Fy = round(Fy,3)
 
             Rx = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I2+(a2*I3))) - Fx
-            Ry = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3+(a2*I2))) + Fy
+            Ry = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I3-(a2*I2))) - Fy
         
         R = sqrt((Rx**2)+(Ry**2))
 
@@ -356,8 +242,8 @@ class ZapataExternaWindow(Frame):
 
         self.textos2[10].delete(0,"end")
         self.textos2[10].insert(0,FD)
-
-    def operacionesF(self):
+    
+    def operacionesPadm(self):
         a1 = float(self.textos[0].get())
         a2 = float(self.textos[1].get())
         a3 = float(self.textos[2].get())
@@ -379,9 +265,121 @@ class ZapataExternaWindow(Frame):
         I2 = 0.5*(sin(a8*(3.14/180))**2) - 0.5*(sin(a7*(3.14/180))**2)
         I3 = ((a8/2)*(3.14/180))-0.25*sin(2*((a8)*(3.14/180))) - (((a7/2)*(3.14/180))-0.25*sin(2*((a7)*(3.14/180))))
 
-        valor1 = (a6*a3*(a5/2)/(sin(a9*(3.14/180))))*I3
-        valor2 = (a2*a6*(a5/2)/(sin(a9*(3.14/180))))*((a5/2)*I1 - a3*I2)
+        Mn = (a1*a6*a3*(a5/2)/(sin(a9*(3.14/180))))*I3
+        Mf = (a2*a1*a6*(a5/2)/(sin(a9*(3.14/180))))*((a5/2)*I1 - a3*I2)
 
+        Θ3 = atan(x/y)
+        
+        if self.list_sentido_fuerza.get() == "hacia la derecha":
+            self.sentido_fuerza = +1
+        if self.list_sentido_fuerza.get() == "hacia la izquierda":
+            self.sentido_fuerza = -1
+        if self.list_sentido_giro.get() == "horario":
+            self.sentido_giro = +1
+        if self.list_sentido_giro.get() == "antihorario":
+            self.sentido_giro = -1
+        self.result = self.sentido_fuerza*self.sentido_giro
+        if self.result == 1:
+            self.label_ener_desener.config(text="Autoenergizante")
+        if self.result == -1:
+            self.label_ener_desener.config(text="Autodesenergizante")
+
+        if self.result == 1:
+            F = (Mn-Mf)/a4
+            F = round(F,3)
+
+            T = (a2*a1*a6*((a5/2)**2)*I1)/(sin(a9*(3.14/180)))
+            T = round(T,3)
+
+            Fx = F*sin(Θ3)
+            Fx = round(Fx,3)
+            Fy = F*cos(Θ3)
+            Fy = round(Fy,3)
+
+            Rx = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(I2-(a2*I3))) - Fx
+            Ry = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(I3+(a2*I2))) - Fy
+        
+        if self.result == -1:
+            F = (Mn+Mf)/a4
+            F = round(F,3)
+
+            T = (a2*a1*a6*((a5/2)**2)*I1)/(sin(a9*(3.14/180)))
+            T = round(T,3)
+
+            Fx = F*sin(Θ3)
+            Fx = round(Fx,3)
+            Fy = F*cos(Θ3)
+            Fy = round(Fy,3)
+
+            Rx = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(I2+(a2*I3))) - Fx
+            Ry = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(I3-(a2*I2))) - Fy
+        
+        R = sqrt((Rx**2)+(Ry**2))
+
+        if  self.textos[10].get() and self.textos[11].get() and self.textos[12].get():
+            self.Calc_pasadores(R)
+            FSp = self.FSp
+            self.textos2[8].delete(0,"end")
+            self.textos2[8].insert(0,FSp)
+
+        if self.textos[13].get() and self.textos[15].get() and self.textos[16].get():
+            self.Calc_tambor(a5,a1)
+            FSt = self.FSt
+            self.textos2[9].delete(0,"end")
+            self.textos2[9].insert(0,FSt)
+        FD = Pa/a1
+
+        self.textos2[2].delete(0,"end")
+        self.textos2[2].insert(0,F)
+
+        self.textos2[1].delete(0,"end")
+        self.textos2[1].insert(0,T)
+
+        self.textos2[0].delete(0,"end")
+        self.textos2[0].insert(0,a9)
+
+        self.textos2[3].delete(0,"end")
+        self.textos2[3].insert(0,Fx)
+        self.textos2[4].delete(0,"end")
+        self.textos2[4].insert(0,Fy)
+
+        self.textos2[5].delete(0,"end")
+        self.textos2[5].insert(0,Rx)
+        self.textos2[6].delete(0,"end")
+        self.textos2[6].insert(0,Ry)
+
+        self.textos2[7].delete(0,"end")
+        self.textos2[7].insert(0,R)
+
+        self.textos2[10].delete(0,"end")
+        self.textos2[10].insert(0,FD)
+        
+
+    def operacionesF(self):
+        a1 = float(self.textos[0].get())
+        a2 = float(self.textos[1].get())
+        a3 = float(self.textos[2].get())
+        a4 = float(self.textos[3].get())
+        a5 = float(self.textos[4].get())
+        a6 = float(self.textos[5].get())
+        a7 = float(self.textos[6].get())
+        a8 = float(self.textos[7].get())
+        y = float(self.textos[8].get())
+        x = float(self.textos[9].get())
+        Pa = float(self.txt18.get())
+
+        if a8 <= 90:
+            a9 = a8
+        if a8 > 90:
+            a9 = 90
+
+        I1 = -cos(radians(a8)) + cos(radians(a7))
+        I2 = 0.5*(sin(radians(a8))**2) - 0.5*(sin(radians(a7))**2)
+        I3 = (radians(a8/2))-0.25*sin(2*(radians(a8))) - ((radians(a7/2))-0.25*sin(2*(radians(a7))))
+
+        valor1 = (a6*a3*(a5/2)/(sin(radians(a9))))*I3
+        valor2 = (a2*a6*(a5/2)/(sin(radians(a9))))*((a5/2)*I1 - a3*I2)
+        
         Θ3 = atan(x/y)
         
         if self.list_sentido_fuerza.get() == "hacia la derecha":
@@ -403,16 +401,18 @@ class ZapataExternaWindow(Frame):
             padm = (a1*a4)/(valor1-valor2)
             padm = round(padm,3)
 
-            T = (a2*padm*a6*((a5/2)**2)*I1)/(sin(a9*(3.14/180)))
+            T = (a2*padm*a6*((a5/2)**2)*I1)/(sin(radians(a9)))
             T = round(T,3)
-            
+
             Fx = a1*sin(Θ3)
             Fx = round(Fx,3)
             Fy = a1*cos(Θ3)
             Fy = round(Fy,3)
 
-            Rx = (((padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I2-(a2*I3))) - Fx
-            Ry = (((padm*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3-(a2*I2))) + Fy
+            Rx = (((padm*a6*(a5/2))/sin(radians(a9)))*(I2-(a2*I3))) - Fx
+            Rx = round(Rx,3)
+            Ry = (((padm*a6*(a5/2))/sin(radians(a9)))*(I3+(a2*I2))) - Fy
+            Ry = round(Ry,3)
 
         if self.result == -1:
             
@@ -427,8 +427,10 @@ class ZapataExternaWindow(Frame):
             Fy = a1*cos(Θ3)
             Fy = round(Fy,3)
 
-            Rx = (((padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I2+(a2*I3))) - Fx
-            Ry = (((padm*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3+(a2*I2))) + Fy
+            Rx = (((padm*a6*(a5/2))/sin(radians(a9)))*(I2+(a2*I3))) - Fx
+            Rx = round(Rx,3)
+            Ry = (((padm*a6*(a5/2))/sin(radians(a9)))*(I3-(a2*I2))) - Fy
+            Ry = round(Ry,3)
         
         R = sqrt((Rx**2)+(Ry**2))
         
@@ -470,7 +472,6 @@ class ZapataExternaWindow(Frame):
 
         self.textos2[10].delete(0,"end")
         self.textos2[10].insert(0,FD)
-        
 
     def info(self):
         self.mensaje = """Programa que resuelve casos generales tomando en cuenta cada zapata individualmente y un sistema de referencia
@@ -735,7 +736,7 @@ que coincide con el pasador"""
             i += 30
 
         self.base_path = pathlib.Path(__file__).parent.resolve()
-        self.image_filename = 'images\\Freno Zapata Externa.png'
+        self.image_filename = 'images\\Freno.png'
         self.image = Image.open(os.path.join(self.base_path, self.image_filename))
         self.image = self.image.resize((350,350), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)
@@ -743,7 +744,7 @@ que coincide con el pasador"""
         self.lbl17.place(x=1050, y=0, width=350, height=350)
 
         self.base_path_2nd_part = pathlib.Path(__file__).parent.resolve()
-        self.image_filename_2nd_part = 'images\\Zapata externa ancho de cara.png'
+        self.image_filename_2nd_part = 'images\\Zapata interna ancho de cara.png'
         self.image2 = Image.open(os.path.join(self.base_path_2nd_part, self.image_filename_2nd_part))
         self.image2 = self.image2.resize((350,380), Image.Resampling.LANCZOS)
         self.img2 = ImageTk.PhotoImage(self.image2)
@@ -795,9 +796,9 @@ que coincide con el pasador"""
 
 if __name__ == "__main__":
     root = Tk()
-    root.wm_title("Calculos de validacion para frenos y embragues de zapata externa")
+    root.wm_title("Calculos de validacion para frenos y embragues de zapata interna")
     base_path_3rd_part = pathlib.Path(__file__).parent.resolve()
     image_filename_3rd_part = "images\\Logo ANFRA.ico"
     icono = os.path.join(base_path_3rd_part, image_filename_3rd_part)
     root.iconbitmap(icono)
-    ZapataExternaWindow(root).mainloop()
+    ZapataInternaWindow(root).mainloop()

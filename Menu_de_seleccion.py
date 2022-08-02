@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import messagebox
-from Frenos_tambor_zapata_interna import ZapataInternaWindow
+from Frenos_tambor_zapata_interna_dos import ZapataInternaWindow
 from Frenos_Tambor_zapata_externa import ZapataExternaWindow
 from Zapata_Externa_Simetrica import ZapataESimetricaWindow
 from Frenos_Banda import BandaWindow

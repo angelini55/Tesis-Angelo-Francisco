@@ -7,8 +7,6 @@ from tkinter import ttk
 from tkinter.ttk import Combobox; PhotoImage; Combobox
 from math import *
 from PIL import ImageTk, Image
-from TablaMaterialesFriccionSI import TablaMaterialesSI
-from TablaMaterialesFriccionIngles import TablaMaterialesIngles
 
 class BandaWindow(Frame):
 
@@ -19,12 +17,6 @@ class BandaWindow(Frame):
         self.create_widget()
 
     def tablaMaterial(self):
-        # if self.list2.get() == self.listaUnds[0]:
-        #     tabla = Toplevel()
-        #     self.table = TablaMaterialesSI(tabla, self)
-        # if self.list2.get() == self.listaUnds[1]:
-        #     tabla = Toplevel()
-        #     self.table = TablaMaterialesIngles(tabla, self)
 
         self.table_window = Toplevel(width=1100, height=500)        
         self.generated_table = ttk.Treeview(self.table_window, columns=("col1","col2","col3","col4","col5","col6","col7"))
@@ -36,6 +28,7 @@ class BandaWindow(Frame):
         self.generated_table.column("col4", width=100)
         self.generated_table.column("col5", width=100)
         self.generated_table.column("col6", width=100)
+
         if self.list2.get() == self.listaUnds[0]: 
             self.generated_table.heading("#0", text="Material de friccion", anchor=CENTER)
             self.generated_table.heading("col1", text="P maxima MPa", anchor=CENTER)
@@ -118,8 +111,6 @@ class BandaWindow(Frame):
 
         self.submit = Button(self.table_window, text="Insertar", command=set_mawp)
         self.submit.place(x=160, y=450)
-        
-
 
 
     def CalcFD(self):
@@ -516,5 +507,5 @@ FD: Factor de diseño"""
 if __name__ == "__main__":
     root = Tk()
     root.resizable(0,0)
-    root.wm_title("Frenos de tambor con zapata interna")
+    root.wm_title("Frenos de Banda")
     BandaWindow(root).mainloop()

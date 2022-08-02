@@ -1,7 +1,9 @@
 import os
+import sqlite3
 import pathlib
 from tkinter import *
 from tkinter import messagebox
+from tkinter import ttk
 from tkinter.ttk import Combobox; PhotoImage; Combobox
 from math import *
 from PIL import ImageTk, Image
@@ -11,7 +13,7 @@ from TablaMaterialesFriccionIngles import TablaMaterialesIngles
 class CircularWindow(Frame):
 
     def __init__(self, master=None):
-        super().__init__(master, width=700, height=480)
+        super().__init__(master, width=1000, height=630)
         self.master = master
         self.pack()
         self.create_widget()
@@ -28,12 +30,99 @@ FD: Factor de diseño"""
         messagebox.showinfo(title="Ayuda", message=self.mensaje)
 
     def tablaMaterial(self):
+        self.table_window = Toplevel(width=1100, height=500)        
+        self.generated_table = ttk.Treeview(self.table_window, columns=("col1","col2","col3","col4","col5","col6","col7"))
+        self.generated_table.place(x=0, y=0, width=1100, height=400)
+        self.generated_table.column("#0", width=100)
+        self.generated_table.column("col1", width=90)
+        self.generated_table.column("col2", width=100)
+        self.generated_table.column("col3", width=100)
+        self.generated_table.column("col4", width=100)
+        self.generated_table.column("col5", width=100)
+        self.generated_table.column("col6", width=100)
+
+        if self.list2.get() == self.listaUnds[0]: 
+            self.generated_table.heading("#0", text="Material de friccion", anchor=CENTER)
+            self.generated_table.heading("col1", text="P maxima MPa", anchor=CENTER)
+            self.generated_table.heading("col2", text="µ minimo humedo", anchor=CENTER)
+            self.generated_table.heading("col3", text="µ minimo seco", anchor=CENTER)
+            self.generated_table.heading("col4", text="T maxima instantanea °C", anchor=CENTER)
+            self.generated_table.heading("col5", text="T maxima continua °C", anchor=CENTER)
+            self.generated_table.heading("col6", text="Velocidad maxima m/s", anchor=CENTER)
+        if self.list2.get() == self.listaUnds[1]: 
+            self.generated_table.heading("#0", text="Material de friccion", anchor=CENTER)
+            self.generated_table.heading("col1", text="P maxima PSI", anchor=CENTER)
+            self.generated_table.heading("col2", text="µ minimo humedo", anchor=CENTER)
+            self.generated_table.heading("col3", text="µ minimo seco", anchor=CENTER)
+            self.generated_table.heading("col4", text="T maxima instantanea °F", anchor=CENTER)
+            self.generated_table.heading("col5", text="T maxima continua °F", anchor=CENTER)
+            self.generated_table.heading("col6", text="Velocidad maxima pie/min", anchor=CENTER)
+
+        µ = float(self.textos[3].get())
+
+        base_path2 = pathlib.Path(__file__).parent.resolve()
+        nombre_bd = 'Tabla materiales de friccion.db'
+        dbfile = os.path.join(base_path2, nombre_bd)
+        conexion = sqlite3.connect(dbfile)
+        cursor = conexion.cursor()
+
         if self.list2.get() == self.listaUnds[0]:
-            tabla = Toplevel()
-            self.table = TablaMaterialesSI(tabla, self)
+            cursor.execute(f"""SELECT 
+                                        Presion_maxima,
+                                        Coeficiente_de_friccion_minimo_humedo,
+                                        Coeficiente_de_friccion_minimo_seco,
+                                        Temperatura_maxima_instantanea,
+                                        Temperatura_maxima_continua,
+                                        Velocidad maxima
+                                FROM Internacional WHERE Coeficiente_de_friccion_minimo_humedo >'{µ}' OR Coeficiente_de_friccion_minimo_seco >'{µ}'""")
         if self.list2.get() == self.listaUnds[1]:
-            tabla = Toplevel()
-            self.table = TablaMaterialesIngles(tabla, self)
+            cursor.execute(f"""SELECT 
+                                        Presion_maxima,
+                                        Coeficiente_de_friccion_minimo_humedo,
+                                        Coeficiente_de_friccion_minimo_seco,
+                                        Temperatura_maxima_instantanea,
+                                        Temperatura_maxima_continua,
+                                        Velocidad maxima
+                                FROM Ingles WHERE Coeficiente_de_friccion_minimo_humedo >'{µ}' OR Coeficiente_de_friccion_minimo_seco >'{µ}'""")
+        values = cursor.fetchall()
+        cursor.execute(f"SELECT Material_de_friccion FROM Internacional WHERE Coeficiente_de_friccion_minimo_humedo>'{µ}' OR Coeficiente_de_friccion_minimo_seco>'{µ}'")
+        material = cursor.fetchall()
+        i=0
+        for elements in material:
+            self.generated_table.insert("", END,text=elements, values=(values[i]))
+            i+=1
+
+        def selectItem(event):
+            curItem = self.generated_table.focus()
+            sas = self.generated_table.item(curItem)
+            a12 = sas.get("values")[0]
+            self.txttabla.delete(0,"end")
+            self.txttabla.insert(0,a12)
+            material = sas.get("text")
+            self.lbl2.config(text=material)
+
+        self.generated_table.bind('<ButtonRelease-1>', selectItem)
+
+        self.lbl = Label(self.table_window,text='Pa')
+        self.lbl.place(x=10, y=450, width=50, height=20)
+        self.lbl2 = Label(self.table_window)
+        self.lbl2.place(x=10, y=420, width=150, height=20)
+        self.txttabla = Entry(self.table_window)
+        self.txttabla.place(x=70, y=450, width=80, height=20)
+
+        def set_mawp():
+            mawp = float(self.txttabla.get())
+            mawp = mawp*1000
+            material = self.lbl2["text"]
+            self.txt18.delete(0,"end")
+            self.txt18.insert(0, mawp)
+            self.lbl36.config(text=material)
+            if mawp:
+                self.table_window.destroy()
+                return mawp 
+
+        self.submit = Button(self.table_window, text="Insertar", command=set_mawp)
+        self.submit.place(x=160, y=450)
 
     def CalcFD(self):
         if self.list2.get() == self.listaUnds[0]:
@@ -102,22 +191,45 @@ FD: Factor de diseño"""
             self.interpolation_results = interpolation_results
             return interpolation_results
 
-    def operacionesPadm_Rr(self):
+    def operacionesPadm(self):
         R = float(self.textos[2].get())
-        r = float(self.textos[1].get())
+        valor_tabla = float(self.textos[1].get())
         Padm = float(self.textos[0].get())
         µ = float(self.textos[3].get())
 
-        Interpolation_string = "Rr"
-        Rr = R/r
-        self._interpolation(Interpolation_string,Rr)
-        alpha = self.interpolation_results["alpha"]
-        beta = self.interpolation_results["beta"]
+        if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[0]:
+            r = valor_tabla
+            Interpolation_string = "Rr"
+            Rr = R/r
+            self._interpolation(Interpolation_string,Rr)
+            alpha = self.interpolation_results["alpha"]
+            beta = self.interpolation_results["beta"]
+            
+            Pprom = alpha*Padm
+            F = pi*(R**2)*Pprom
+            T = µ*F*beta*r
 
-        Pprom = alpha*Padm
-        F = pi*(R**2)*Pprom
-        T = µ*F*beta*r        
+        if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[1]:     
+            alpha = valor_tabla
+            Interpolation_string = "alpha"
+            self._interpolation(Interpolation_string,alpha)
+            Rr = self.interpolation_results["Rr"]
+            beta = self.interpolation_results["beta"]
 
+            Pprom = alpha*Padm
+            F = pi*(R**2)*Pprom
+            T = µ*F*beta*(R/Rr)
+        
+        if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[2]:
+            beta = valor_tabla
+            Interpolation_string = "beta"
+            self._interpolation(Interpolation_string,beta)
+            Rr = self.interpolation_results["Rr"]
+            alpha = self.interpolation_results["alpha"]
+
+            Pprom = alpha*Padm
+            F = pi*(R**2)*Pprom
+            T = µ*F*beta*(R/Rr)
 
         self.textos2[0].delete(0,"end")
         self.textos2[0].insert(0,F)
@@ -126,23 +238,46 @@ FD: Factor de diseño"""
         self.textos2[1].insert(0,T)
 
 
-    def operacionesPadm_alpha(self):
-        D = float(self.textos[0].get())
-        d = float(self.textos[1].get())
-        α = float(self.textos[2].get())
+    def operacionesT(self):
+        R = float(self.textos[2].get())
+        valor_tabla = float(self.textos[1].get())
+        T = float(self.textos[0].get())
         µ = float(self.textos[3].get())
-        T = float(self.textos[4].get())
 
-        if self.seleccion.get() == 1:
+        if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[0]:
+            r = valor_tabla
+            Interpolation_string = "Rr"
+            Rr = R/r
+            self._interpolation(Interpolation_string,Rr)
+            alpha = self.interpolation_results["alpha"]
+            beta = self.interpolation_results["beta"]
+            
+            Pprom = F/(pi*(R**2))
+            Padm = Pprom/alpha
+            F = T/(µ*beta*r)
 
-            Padm = (12*T*sin(radians(α)))/(pi*µ*((D**3)-(d**3)))
-            F = (pi/4)*Padm*((D**2)-(d**2))          
+        if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[1]:     
+            alpha = valor_tabla
+            Interpolation_string = "alpha"
+            self._interpolation(Interpolation_string,alpha)
+            Rr = self.interpolation_results["Rr"]
+            beta = self.interpolation_results["beta"]
 
-        if self.seleccion.get() == 2:
+            Pprom = F/(pi*(R**2))
+            Padm = Pprom/alpha
+            F = T/(µ*beta*r)
+        
+        if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[2]:
+            beta = valor_tabla
+            Interpolation_string = "beta"
+            self._interpolation(Interpolation_string,beta)
+            Rr = self.interpolation_results["Rr"]
+            alpha = self.interpolation_results["alpha"]
 
-            Padm = (8*T*sin(radians(α)))/(pi*d*µ*((D**2)-(d**2)))
-            F = (pi/2)*d*Padm*(D-d)
-
+            Pprom = F/(pi*(R**2))
+            Padm = Pprom/alpha
+            F = T/(µ*beta*r)
+        
         self.textos2[0].delete(0,"end")
         self.textos2[0].insert(0,Padm)
 
@@ -150,21 +285,44 @@ FD: Factor de diseño"""
         self.textos2[1].insert(0,F)
 
     def operacionesF(self):
-        D = float(self.textos[0].get())
-        d = float(self.textos[1].get())
-        α = float(self.textos[2].get())
+        R = float(self.textos[2].get())
+        valor_tabla = float(self.textos[1].get())
+        F = float(self.textos[0].get())
         µ = float(self.textos[3].get())
-        F = float(self.textos[4].get())
 
-        if self.seleccion.get() == 1:
+        if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[0]:
+            r = valor_tabla
+            Interpolation_string = "Rr"
+            Rr = R/r
+            self._interpolation(Interpolation_string,Rr)
+            alpha = self.interpolation_results["alpha"]
+            beta = self.interpolation_results["beta"]
+            
+            Pprom = F/(pi*(R**2))
+            Padm = Pprom/alpha
+            T = µ*F*beta*(R/Rr)
 
-            Padm = (4*F)/(pi*((D**2)-(d**2)))
-            T = ((pi*µ*Padm)/(12*sin(radians(α))))*(((D**3)-(d**3)))
+        if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[1]:     
+            alpha = valor_tabla
+            Interpolation_string = "alpha"
+            self._interpolation(Interpolation_string,alpha)
+            Rr = self.interpolation_results["Rr"]
+            beta = self.interpolation_results["beta"]
 
-        if self.seleccion.get() == 2:
+            Pprom = F/(pi*(R**2))
+            Padm = Pprom/alpha
+            T = µ*F*beta*(R/Rr)
+        
+        if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[2]:
+            beta = valor_tabla
+            Interpolation_string = "beta"
+            self._interpolation(Interpolation_string,beta)
+            Rr = self.interpolation_results["Rr"]
+            alpha = self.interpolation_results["alpha"]
 
-            Padm = (2*F)/(pi*d*(D-d))
-            T = ((pi*d*µ*Padm)/(8*sin(radians(α))))*(((D**2)-(d**2)))
+            Pprom = F/(pi*(R**2))
+            Padm = Pprom/alpha
+            T = µ*F*beta*(R/Rr)
         
         self.textos2[0].delete(0,"end")
         self.textos2[0].insert(0,Padm)
@@ -233,9 +391,9 @@ FD: Factor de diseño"""
         self.image = self.image.resize((300,250), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)
         self.lbl17 = Label(self, image=self.img)
-        self.lbl17.place(x=390, y=10, height=250, width=300)
+        self.lbl17.place(x=700, y=10, height=250, width=300)
 
-        self.boton1 = Button(self, text="Solve", command=self.operacionesPadm_Rr)
+        self.boton1 = Button(self, text="Solve", command=self.operacionesPadm)
         self.boton1.place(x=450, y=300, width=100, height=80)
 
         self.lblSU = Label(self, text="Sistema de unidades")
@@ -256,8 +414,11 @@ FD: Factor de diseño"""
                     lbl.config(text=Internacional[i])
                     i += 1
                 self.list["state"]="readonly"
+                self.list_interpolation_table["state"]="readonly"
+                self.list3["state"]="readonly"
                 for entries in self.textos:
                     entries.config(state=NORMAL)
+                self.textos[3]["state"]="disabled"
                 for entries in self.textos2:
                     entries.config(state=NORMAL)
             if self.list2.get() == self.listaUnds[1]:
@@ -269,8 +430,11 @@ FD: Factor de diseño"""
                     lbl.config(text=Ingles[i])
                     i += 1
                 self.list["state"]="readonly"
+                self.list_interpolation_table["state"]="readonly"
+                self.list3["state"]="readonly"
                 for entries in self.textos:
                     entries.config(state=NORMAL)
+                self.textos[3]["state"]="disabled"
                 for entries in self.textos2:
                     entries.config(state=NORMAL)
         self.list2.bind('<<ComboboxSelected>>', cambioUnds)
@@ -333,8 +497,113 @@ FD: Factor de diseño"""
                     self.boton1.config(command=self.operacionesPadm)
         self.list.bind('<<ComboboxSelected>>', callback)
         self.list.current(2)
-
         self.list.place(x=215, y=70)
+
+        self.opciones_list_interpolation_table = ["Dada r'", "Dado α", "Dado ß"]
+        self.list_interpolation_table = Combobox(self, width=15, values=self.opciones_list_interpolation_table, state="disabled")
+        def callback1(event):
+            if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[0]:
+                self.labels[1].config(text="r'")
+            if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[1]:
+                self.labels[1].config(text="α")
+            if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[2]:
+                self.labels[1].config(text="ß")
+        self.list_interpolation_table.bind('<<ComboboxSelected>>', callback1)
+        self.list_interpolation_table.current(0)
+        self.list_interpolation_table.place(x=395, y=70)
+
+        self.coef_label = Label(self, text="Para el coeficiente de friccion")
+        self.coef_label.place(x=215, y=95)
+        self.lista_coef = ["Con material de friccion","Ingresando valor"]
+        self.list3 = Combobox(self, width=25, values=self.lista_coef, state="disabled")
+        def cambio_coef(event):
+            if self.list3.get() == self.lista_coef[0]:
+                self.list4["state"]="readonly"
+            if self.list3.get() == self.lista_coef[1]:
+                self.textos[3]["state"]="normal"
+                self.btn3["state"] = "normal"
+        self.list3.bind('<<ComboboxSelected>>', cambio_coef)
+        self.list3.place(x=215, y=115)
+
+        self.lista_mat_friccion_label = Label(self, text="Material de friccion")
+        self.lista_mat_friccion_label.place(x=395, y=95)
+        self.lista_mat_friccion = ["Fundicion de hierro","Metal sinterizado","Madera","Cuero","Corcho","Fieltro","Asbesto tejido",
+        "Asbesto moldeado","Asbesto impregnado","Grafito de carbono","Cermet","Cuerda de asbesto arrollado","Tira de asbesto tejido",
+        "Algodón tejido","Papel resiliente"]
+        self.list4 = Combobox(self, width=20, values=self.lista_mat_friccion, state="disabled")
+        def Mat(event):
+            self.list5["state"]="readonly"
+        self.list4.bind('<<ComboboxSelected>>', Mat)
+        self.list4.place(x=395, y=115)
+
+        self.lista_humedo_seco = ["Ambiente humedo","Ambiente seco"]
+        self.list5 = Combobox(self, width=20, values=self.lista_humedo_seco, state="disabled")
+        def humedo_seco(event):
+            base_path2 = pathlib.Path(__file__).parent.resolve()
+            nombre_bd = 'Tabla materiales de friccion.db'
+            dbfile = os.path.join(base_path2, nombre_bd)
+            conexion = sqlite3.connect(dbfile)
+            cursor = conexion.cursor()
+            if self.list5.get() == self.lista_humedo_seco[0]:
+                if self.list2.get() == self.listaUnds[0]:
+                    cursor.execute(f"SELECT Coeficiente_de_friccion_minimo_humedo FROM Internacional WHERE Material_de_friccion='{self.list4.get()}'")
+                    coeficiente_dato = cursor.fetchone()
+                    cursor.execute(f"SELECT Presion_maxima FROM Internacional WHERE Material_de_friccion='{self.list4.get()}'")
+                    presion_maxima_dato = cursor.fetchone()
+                    presion_maxima_dato = presion_maxima_dato[0]*1000
+                    self.textos[3]["state"]="normal"
+                    self.textos[3].delete(0,"end")
+                    self.textos[3].insert(0,coeficiente_dato)
+                    self.textos[3]["state"]="disabled"
+
+                    self.txt18.delete(0,"end")
+                    self.txt18.insert(0, presion_maxima_dato)
+                    self.lbl36.config(text=self.list4.get())
+                if self.list2.get() == self.listaUnds[1]:
+                    cursor.execute(f"SELECT Coeficiente_de_friccion_minimo_humedo FROM Ingles WHERE Material_de_friccion='{self.list4.get()}' ")
+                    coeficiente_dato = cursor.fetchone()
+                    cursor.execute(f"SELECT Presion_maxima FROM Ingles WHERE Material_de_friccion='{self.list4.get()}'")
+                    presion_maxima_dato = cursor.fetchone()
+                    self.textos[3]["state"]="normal"
+                    self.textos[3].delete(0,"end")
+                    self.textos[3].insert(0,coeficiente_dato)
+                    self.textos[3]["state"]="disabled"
+
+                    self.txt18.delete(0,"end")
+                    self.txt18.insert(0, presion_maxima_dato)
+                    self.lbl36.config(text=self.list4.get())
+            if self.list5.get() == self.lista_humedo_seco[1]:
+                if self.list2.get() == self.listaUnds[0]:
+                    cursor.execute(f"SELECT Coeficiente_de_friccion_minimo_seco FROM Internacional WHERE Material_de_friccion='{self.list4.get()}'")
+                    coeficiente_dato = cursor.fetchone()
+                    cursor.execute(f"SELECT Presion_maxima FROM Internacional WHERE Material_de_friccion='{self.list4.get()}'")
+                    presion_maxima_dato = cursor.fetchone()
+                    presion_maxima_dato = presion_maxima_dato[0]*1000
+                    self.textos[3]["state"]="normal"
+                    self.textos[3].delete(0,"end")
+                    self.textos[3].insert(0,coeficiente_dato)
+                    self.textos[3]["state"]="disabled"
+
+                    self.txt18.delete(0,"end")
+                    self.txt18.insert(0, presion_maxima_dato)
+                    self.lbl36.config(text=self.list4.get())
+                if self.list2.get() == self.listaUnds[1]:
+                    cursor.execute(f"SELECT Coeficiente_de_friccion_minimo_seco FROM Ingles WHERE Material_de_friccion='{self.list4.get()}'")
+                    coeficiente_dato = cursor.fetchone()
+                    cursor.execute(f"SELECT Presion_maxima FROM Ingles WHERE Material_de_friccion='{self.list4.get()}'")
+                    presion_maxima_dato = cursor.fetchone()
+                    self.textos[3]["state"]="normal"
+                    self.textos[3].delete(0,"end")
+                    self.textos[3].insert(0,coeficiente_dato)
+                    self.textos[3]["state"]="disabled"
+
+                    self.txt18.delete(0,"end")
+                    self.txt18.insert(0, presion_maxima_dato)
+                    self.lbl36.config(text=self.list4.get())
+            conexion.close()
+            self.btn3["state"] = "disabled"
+        self.list5.bind('<<ComboboxSelected>>', humedo_seco)
+        self.list5.place(x=545, y=115)
 
         self.lbl18 = Label(self,text='Pa')
         self.lbl18.place(x=200, y=305, width=40, height=20)
@@ -346,7 +615,7 @@ FD: Factor de diseño"""
         self.btnayuda = Button(self, text='?', command = self.ayuda)
         self.btn3 = Button(self, text='tabla', command=self.tablaMaterial)
         self.btn4 = Button(self, text='calc', command=self.CalcFD)
-        self.btnayuda.place(x=215, y=130, width=30, height=30)
+        self.btnayuda.place(x=215, y=140, width=30, height=30)
         self.btn3.place(x=320, y=300, width=40, height=40)
         self.btn4.place(x=320, y=350, width=40, height=40)
 
