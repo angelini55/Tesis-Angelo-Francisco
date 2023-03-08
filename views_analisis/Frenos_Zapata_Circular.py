@@ -1,4 +1,7 @@
 import os
+import sys
+
+sys.path.append("..")
 import pathlib
 import sqlite3
 from math import *
@@ -7,7 +10,11 @@ from tkinter import messagebox, ttk
 
 from PIL import Image, ImageTk
 
+from Temperatura_new import TemperaturaWindow
+
 from tkinter.ttk import Combobox; PhotoImage; Combobox
+
+from app_path import resource_path
 
 class CircularWindow(Frame):
 
@@ -20,7 +27,7 @@ class CircularWindow(Frame):
     def info(self):
         self.mensaje = """Programa que resuelve casos generales tomando en cuenta cada zapata individualmente y un sistema de referencia
 que coincide con el pasador"""
-        messagebox.showinfo(title="Aclaratoria", message=self.mensaje)
+        messagebox.showinfo(title="Aclaratoria", message=self.mensaje, parent=self)
 
     def tablaMaterial(self):
         try:
@@ -36,28 +43,28 @@ que coincide con el pasador"""
             self.generated_table.column("col6", width=100)
 
             if self.list2.get() == self.listaUnds[0]: 
-                self.generated_table.heading("#0", text="Material de friccion", anchor=CENTER)
-                self.generated_table.heading("col1", text="P maxima MPa", anchor=CENTER)
-                self.generated_table.heading("col2", text="µ minimo humedo", anchor=CENTER)
-                self.generated_table.heading("col3", text="µ minimo seco", anchor=CENTER)
-                self.generated_table.heading("col4", text="T maxima instantanea °C", anchor=CENTER)
-                self.generated_table.heading("col5", text="T maxima continua °C", anchor=CENTER)
-                self.generated_table.heading("col6", text="Velocidad maxima m/s", anchor=CENTER)
+                self.generated_table.heading("#0", text="Material de fricción", anchor=CENTER)
+                self.generated_table.heading("col1", text="P máxima MPa", anchor=CENTER)
+                self.generated_table.heading("col2", text="µ mínimo húmedo", anchor=CENTER)
+                self.generated_table.heading("col3", text="µ mínimo seco", anchor=CENTER)
+                self.generated_table.heading("col4", text="T máxima instantánea °C", anchor=CENTER)
+                self.generated_table.heading("col5", text="T máxima continua °C", anchor=CENTER)
+                self.generated_table.heading("col6", text="Velocidad máxima m/s", anchor=CENTER)
             if self.list2.get() == self.listaUnds[1]: 
-                self.generated_table.heading("#0", text="Material de friccion", anchor=CENTER)
-                self.generated_table.heading("col1", text="P maxima PSI", anchor=CENTER)
-                self.generated_table.heading("col2", text="µ minimo humedo", anchor=CENTER)
-                self.generated_table.heading("col3", text="µ minimo seco", anchor=CENTER)
-                self.generated_table.heading("col4", text="T maxima instantanea °F", anchor=CENTER)
-                self.generated_table.heading("col5", text="T maxima continua °F", anchor=CENTER)
-                self.generated_table.heading("col6", text="Velocidad maxima pie/min", anchor=CENTER)
+                self.generated_table.heading("#0", text="Material de fricción", anchor=CENTER)
+                self.generated_table.heading("col1", text="P máxima PSI", anchor=CENTER)
+                self.generated_table.heading("col2", text="µ mínimo húmedo", anchor=CENTER)
+                self.generated_table.heading("col3", text="µ mínimo seco", anchor=CENTER)
+                self.generated_table.heading("col4", text="T máxima instantánea °F", anchor=CENTER)
+                self.generated_table.heading("col5", text="T máxima continua °F", anchor=CENTER)
+                self.generated_table.heading("col6", text="Velocidad máxima pie/min", anchor=CENTER)
 
             µ = float(self.textos[3].get())
             if not self.list5.get():
                 raise ValueError
 
             base_path2 = pathlib.Path(__file__).parent.parent.resolve()
-            nombre_bd = 'Tabla materiales de friccion.db'
+            nombre_bd = resource_path('images/Tabla materiales de friccion.db')
             dbfile = os.path.join(base_path2, nombre_bd)
             conexion = sqlite3.connect(dbfile)
             cursor = conexion.cursor()
@@ -125,7 +132,7 @@ que coincide con el pasador"""
             self.lbl = Label(self.table_window,text='Pa')
             self.lbl.place(x=10, y=450, width=50, height=20)
             self.lbl2 = Label(self.table_window)
-            self.lbl2.place(x=10, y=420, width=150, height=20)
+            self.lbl2.place(x=10, y=420, height=20)
             self.txttabla = Entry(self.table_window)
             self.txttabla.place(x=70, y=450, width=80, height=20)
 
@@ -143,7 +150,32 @@ que coincide con el pasador"""
             self.submit.place(x=160, y=450)
         except:
             self.table_window.destroy()
-            messagebox.showerror(title="Error", message="Completa la seccion de coeficiente de friccion para obtener un valor")
+            messagebox.showerror(title="Error", message="Completa la seccion de coeficiente de friccion para obtener un valor", parent=self)
+
+    def vent_temp(self):
+        vent = TemperaturaWindow(Toplevel())
+        unidades = self.list2.get()
+        material = self.lbl36["text"].strip("}{")
+        ambiente = self.list5.get()
+        tambor = self.list6.get()
+        vent.list2.set(unidades)
+        vent.list4.set(material)
+        vent.list5.set(ambiente)
+        vent.peso_especifico.set(tambor)
+        vent.list2.event_generate('<<ComboboxSelected>>')
+        vent.tipo_freno.set("Disco")
+        vent.tipo_freno.event_generate('<<ComboboxSelected>>')
+        vent.tipo_freno["state"] = "disabled"
+        vent.list5.event_generate('<<ComboboxSelected>>')
+        vent.list4.event_generate('<<ComboboxSelected>>')
+        vent.peso_especifico.event_generate('<<ComboboxSelected>>')
+        # Dext = self.textos[13].get()
+        # Lt = self.textos[14].get()
+        # t = self.textos[15].get()
+        # vent.textos2[0].insert(0,Lt)
+        # vent.textos2[1].insert(0,Dext)
+        # vent.textos2[2].insert(0,t)
+
 
     def _interpolation(self, string, value):
         self.string = string
@@ -218,7 +250,9 @@ que coincide con el pasador"""
                 
                 Pprom = alpha*Padm
                 F = pi*(R**2)*Pprom
+                F = round(F,2)
                 T = µ*F*beta*r
+                T = round(T,2)
 
             if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[1]:     
                 alpha = valor_tabla
@@ -229,7 +263,9 @@ que coincide con el pasador"""
 
                 Pprom = alpha*Padm
                 F = pi*(R**2)*Pprom
+                F = round(F,2)
                 T = µ*F*beta*(R/Rr)
+                T = round(T,2)
             
             if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[2]:
                 beta = valor_tabla
@@ -240,9 +276,15 @@ que coincide con el pasador"""
 
                 Pprom = alpha*Padm
                 F = pi*(R**2)*Pprom
+                F = round(F,2)
                 T = µ*F*beta*(R/Rr)
+                T = round(T,2)
             
             FD = Pa/Padm
+            FD = round(FD,2)
+
+            for entries in self.textos2:
+                entries.config(state=NORMAL)
 
             self.textos2[0].delete(0,"end")
             self.textos2[0].insert(0,F)
@@ -253,9 +295,9 @@ que coincide con el pasador"""
             self.textos2[2].delete(0,"end")
             self.textos2[2].insert(0,FD)
         except ValueError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros por lo menos hasta la distancia x, incluyendo Pa, y debes ingresar solamente numeros")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los parámetros geométricos de la columna izquierda, y debes ingresar solamente números", parent=self)
         except AttributeError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros de inicializacion")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los parámetros de inicialización", parent=self)
 
     def operacionesT(self):
         try:
@@ -275,7 +317,9 @@ que coincide con el pasador"""
                 
                 Pprom = F/(pi*(R**2))
                 Padm = Pprom/alpha
+                Padm = round(Padm,2)
                 F = T/(µ*beta*r)
+                F = round(F,2)
 
             if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[1]:     
                 alpha = valor_tabla
@@ -286,7 +330,9 @@ que coincide con el pasador"""
 
                 Pprom = F/(pi*(R**2))
                 Padm = Pprom/alpha
+                Padm = round(Padm,2)
                 F = T/(µ*beta*r)
+                F = round(F,2)
             
             if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[2]:
                 beta = valor_tabla
@@ -297,9 +343,15 @@ que coincide con el pasador"""
 
                 Pprom = F/(pi*(R**2))
                 Padm = Pprom/alpha
+                Padm = round(Padm,2)
                 F = T/(µ*beta*r)
+                F = round(F,2)
 
             FD = Pa/Padm
+            FD = round(FD,2)
+
+            for entries in self.textos2:
+                entries.config(state=NORMAL)
             
             self.textos2[0].delete(0,"end")
             self.textos2[0].insert(0,Padm)
@@ -310,9 +362,9 @@ que coincide con el pasador"""
             self.textos2[2].delete(0,"end")
             self.textos2[2].insert(0,FD)
         except ValueError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros por lo menos hasta la distancia x, incluyendo Pa, y debes ingresar solamente numeros")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los parámetros geométricos de la columna izquierda, y debes ingresar solamente números", parent=self)
         except AttributeError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros de inicializacion")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los parámetros de inicialización", parent=self)
 
     def operacionesF(self):
         try:
@@ -332,7 +384,9 @@ que coincide con el pasador"""
                 
                 Pprom = F/(pi*(R**2))
                 Padm = Pprom/alpha
+                Padm = round(Padm,2)
                 T = µ*F*beta*(R/Rr)
+                T = round(T,2)
 
             if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[1]:     
                 alpha = valor_tabla
@@ -343,7 +397,9 @@ que coincide con el pasador"""
 
                 Pprom = F/(pi*(R**2))
                 Padm = Pprom/alpha
+                Padm = round(Padm,2)
                 T = µ*F*beta*(R/Rr)
+                T = round(T,2)
             
             if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[2]:
                 beta = valor_tabla
@@ -354,9 +410,15 @@ que coincide con el pasador"""
 
                 Pprom = F/(pi*(R**2))
                 Padm = Pprom/alpha
+                Padm = round(Padm,2)
                 T = µ*F*beta*(R/Rr)
+                T = round(T,2)
 
             FD = Pa/Padm
+            FD = round(FD,2)
+
+            for entries in self.textos2:
+                entries.config(state=NORMAL)
             
             self.textos2[0].delete(0,"end")
             self.textos2[0].insert(0,Padm)
@@ -367,9 +429,9 @@ que coincide con el pasador"""
             self.textos2[2].delete(0,"end")
             self.textos2[2].insert(0,FD)
         except ValueError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros por lo menos hasta la distancia x, incluyendo Pa, y debes ingresar solamente numeros")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los parámetros geométricos de la columna izquierda, y debes ingresar solamente números", parent=self)
         except AttributeError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros de inicializacion")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los parámetros de inicialización", parent=self)
         
     def create_widget(self):
 
@@ -383,7 +445,7 @@ que coincide con el pasador"""
         textoslbl = ["Padm: Presión máxima admisible ejercida sobre el material de fricción","r: Ubicación de la línea de acción de la fuerza de accionamiento",
         "R: Radio de la zapata circular","µ: Coeficiente de fricción dinámico del material de fricción"]
         for textos in textoslbl:
-            self.labels.append(Label(self, text=textos, bg="#808080"))
+            self.labels.append(Label(self, text=textos, bg="#808080", font=("Tahoma", 9)))
         i=200
         for cosas in self.labels:
             cosas.place(x=40, y=i)
@@ -400,7 +462,7 @@ que coincide con el pasador"""
         self.listunds = []
         unds = ["MPa","mm","mm",""]
         for unidades in unds:
-            self.listunds.append(Label(self, bg="#808080"))
+            self.listunds.append(Label(self, bg="#808080", font=("Tahoma", 9)))
         i=200
         for unidades in self.listunds:
             unidades.place(x=530, y=i)
@@ -409,10 +471,10 @@ que coincide con el pasador"""
         self.labels2 = []
         textoslabels2 = ["F: Fuerza de accionamiento","T: Par de torsión del freno o embrague","FD: Factor de diseño"]
         for textos in textoslabels2:
-            self.labels2.append(Label(self, text=textos, bg="#808080"))
+            self.labels2.append(Label(self, text=textos, bg="#808080", font=("Tahoma", 9)))
         i=200
         for cosas in self.labels2:
-            cosas.place(x=560, y=i)
+            cosas.place(x=590, y=i)
             i += 30
 
         self.textos2 = []
@@ -426,24 +488,26 @@ que coincide con el pasador"""
         self.listunds2 = []
         unds2 = ["N","N.mm",""]
         for unidades in unds2:
-            self.listunds2.append(Label(self, bg="#808080"))
+            self.listunds2.append(Label(self, bg="#808080", font=("Tahoma", 9)))
         i=200
         for unidades in self.listunds2:
             unidades.place(x=1020, y=i)
             i += 30
 
         self.base_path = pathlib.Path(__file__).parent.parent.resolve()
-        self.image_filename ='images\\Freno Zapata Circular.png'
+        self.image_filename =resource_path('images\\Freno Zapata Circular.png')
         self.image = Image.open(os.path.join(self.base_path, self.image_filename))
         self.image = self.image.resize((300,250), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)
         self.lbl17 = Label(self, image=self.img)
         self.lbl17.place(x=1070, y=0, height=250, width=300)
 
-        self.boton1 = Button(self, text="Solve", command=self.operacionesPadm)
-        self.boton1.place(x=450, y=400, width=100, height=80)
+        self.boton1 = Button(self, text="Calcular", command=self.operacionesPadm)
+        self.boton1.place(x=450, y=400, width=70, height=50)
+        self.temp_button = Button(self, text="Calc.\ntemperatura", command=self.vent_temp)
+        self.temp_button.place(x=870, y=400, width=75,height=50)
 
-        self.lblSU = Label(self, text="Sistema de unidades", bg="#A9A9A9")
+        self.lblSU = Label(self, text="Sistema de unidades", bg="#A9A9A9", font=("Tahoma", 9))
         self.lblSU.place(x=40, y=10)
 
         Internacional = ["MPa","mm","mm","","N","N.mm",""]
@@ -468,8 +532,8 @@ que coincide con el pasador"""
                 for entries in self.textos:
                     entries.config(state=NORMAL)
                 self.textos[3]["state"]="disabled"
-                for entries in self.textos2:
-                    entries.config(state=NORMAL)
+                # for entries in self.textos2:
+                #     entries.config(state=NORMAL)
             if self.list2.get() == self.listaUnds[1]:
                 i=0
                 for lbl in self.listunds:
@@ -486,12 +550,12 @@ que coincide con el pasador"""
                 for entries in self.textos:
                     entries.config(state=NORMAL)
                 self.textos[3]["state"]="disabled"
-                for entries in self.textos2:
-                    entries.config(state=NORMAL)
+                # for entries in self.textos2:
+                #     entries.config(state=NORMAL)
         self.list2.bind('<<ComboboxSelected>>', cambioUnds)
         self.list2.place(x=40, y=30)
 
-        self.lbl_options = Label(self, text="Variables a calcular", bg="#A9A9A9")
+        self.lbl_options = Label(self, text="Variables a calcular", bg="#A9A9A9", font=("Tahoma", 9))
         self.lbl_options.place(x=40, y=60)
         self.opciones = ["Dada F, hallar T y Padm", "Dada T, hallar F y Padm", "Dada Padm, hallar F y T"]
         self.list = Combobox(self, width=25, values=self.opciones, state="disabled")
@@ -551,23 +615,23 @@ que coincide con el pasador"""
         self.list.current(2)
         self.list.place(x=40, y=80)
 
-        txt_beta = "ß: Relacion entre el radio efectivo con la ubicación \nde la línea de acción de la fuerza de accionamiento"
+        txt_beta = "ß: Relación entre el radio efectivo con la ubicación \nde la línea de acción de la fuerza de accionamiento"
         self.opciones_list_interpolation_table = ["Dada r'", "Dado α", "Dado ß"]
         self.list_interpolation_table = Combobox(self, width=15, values=self.opciones_list_interpolation_table, state="disabled")
         def callback1(event):
             if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[0]:
                 self.labels[1].config(text="r': Ubicación de la línea de acción de la fuerza de accionamiento")
             if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[1]:
-                self.labels[1].config(text="α: Relacion entre la presión promedio Pprom con la presión máxima admisible Padm")
+                self.labels[1].config(text="α: Relación entre la presión promedio Pprom con la presión máxima admisible Padm")
             if self.list_interpolation_table.get() == self.opciones_list_interpolation_table[2]:
                 self.labels[1].config(text=txt_beta)
         self.list_interpolation_table.bind('<<ComboboxSelected>>', callback1)
         self.list_interpolation_table.current(0)
         self.list_interpolation_table.place(x=240, y=80)
 
-        self.coef_label = Label(self, text="Para el coeficiente de friccion", bg="#A9A9A9")
+        self.coef_label = Label(self, text="Para el coeficiente de fricción", bg="#A9A9A9", font=("Tahoma", 9))
         self.coef_label.place(x=40, y=140)
-        self.lista_coef = ["Con material de friccion","Ingresando valor"]
+        self.lista_coef = ["Con material de fricción","Ingresando valor"]
         self.list3 = Combobox(self, width=25, values=self.lista_coef, state="disabled")
         def cambio_coef(event):
             if self.list3.get() == self.lista_coef[0]:
@@ -581,15 +645,15 @@ que coincide con el pasador"""
         self.list3.bind('<<ComboboxSelected>>', cambio_coef)
         self.list3.place(x=40, y=160)
 
-        self.lista_mat_friccion_label = Label(self, text="Material de friccion", bg="#A9A9A9")
+        self.lista_mat_friccion_label = Label(self, text="Material de fricción", bg="#A9A9A9", font=("Tahoma", 9))
         self.lista_mat_friccion_label.place(x=420, y=140)
-        self.lista_mat_friccion = ["Fundicion de hierro","Metal sinterizado con tambor de acero","Metal sinterizado con tambor de fundicion de hierro",
+        self.lista_mat_friccion = ["Fundición de hierro","Metal sinterizado con tambor de acero","Metal sinterizado con tambor de fundición de hierro",
         "Madera","Cuero","Corcho","Fieltro","Asbesto tejido","Asbesto moldeado","Asbesto impregnado","Grafito de carbono","Cermet",
         "Cuerda de asbesto arrollado","Tira de asbesto tejido","Algodón tejido","Papel resiliente"]
         self.list4 = Combobox(self, width=20, values=self.lista_mat_friccion, state="disabled")
         def Mat(event):
             base_path2 = pathlib.Path(__file__).parent.parent.resolve()
-            nombre_bd = 'Tabla materiales de friccion.db'
+            nombre_bd = resource_path('images/Tabla materiales de friccion.db')
             dbfile = os.path.join(base_path2, nombre_bd)
             conexion = sqlite3.connect(dbfile)
             cursor = conexion.cursor()
@@ -649,12 +713,25 @@ que coincide con el pasador"""
                     self.lbl36.config(text=self.list4.get())
             conexion.close()
             self.btn3["state"] = "disabled"
+            self.list6["state"] = "readonly"
+            if self.list4.get() == "Fundición de hierro" or self.list4.get() == "Metal sinterizado con tambor de fundición de hierro":
+                self.list6.set("Fundición de hierro")
+                self.list6["state"] = "disabled"
+            elif self.list4.get() == "Grafito de carbono" or self.list4.get() == "Metal sinterizado con tambor de acero":
+                self.list6.set("Acero")
+                self.list6["state"] = "disabled"
         self.list4.bind('<<ComboboxSelected>>', Mat)
         self.list4.place(x=420, y=160)
 
-        self.lista_humedo_seco_lbl = Label(self, text="Tipo de ambiente", bg="#A9A9A9")
+        self.lista_mat_tambor_lbl = Label(self, text="Material del tambor", bg="#A9A9A9", font=("Tahoma", 9))
+        self.lista_mat_tambor_lbl.place(x=590, y=140)
+        self.lista_mat_tambor = ["Fundición de hierro", "Acero"]     
+        self.list6 = Combobox(self, width=20, values=self.lista_mat_tambor, state="disabled")
+        self.list6.place(x=590, y=160)
+
+        self.lista_humedo_seco_lbl = Label(self, text="Tipo de ambiente", bg="#A9A9A9", font=("Tahoma", 9))
         self.lista_humedo_seco_lbl.place(x=240, y=140) 
-        self.lista_humedo_seco = ["Ambiente humedo","Ambiente seco"]
+        self.lista_humedo_seco = ["Ambiente húmedo","Ambiente seco"]
         self.list5 = Combobox(self, width=20, values=self.lista_humedo_seco, state="disabled")
         def humedo_seco(event):
             if self.list3.get() == self.lista_coef[0]:
@@ -662,7 +739,7 @@ que coincide con el pasador"""
         self.list5.bind('<<ComboboxSelected>>', humedo_seco)
         self.list5.place(x=240, y=160)
 
-        self.lbl18 = Label(self,text='Pa', bg="#A9A9A9")
+        self.lbl18 = Label(self,text='Pa', bg="#A9A9A9", font=("Tahoma", 9))
         self.lbl18.place(x=700, y=80)
         self.txt18 = Entry(self, state="disabled")
         self.txt18.place(x=720, y=80, width=60)
@@ -675,6 +752,7 @@ que coincide con el pasador"""
         self.btn3.place(x=820, y=80, width=40, height=40)
         self.info_button = Button(self, text="!", bg="yellow", command=self.info)
         self.info_button.place(x=240, y=30, width=25, height=25)
+        
 
 if __name__ == "__main__":
     root = Tk()

@@ -14,6 +14,8 @@ from Temperatura_new import TemperaturaWindow
 
 from tkinter.ttk import Combobox; PhotoImage; Combobox
 
+from app_path import resource_path
+
 class ZapataESimetricaWindow(Frame):
 
     def __init__(self, master=None):
@@ -36,28 +38,28 @@ class ZapataESimetricaWindow(Frame):
             self.generated_table.column("col6", width=100)
 
             if self.list2.get() == self.listaUnds[0]: 
-                self.generated_table.heading("#0", text="Material de friccion", anchor=CENTER)
-                self.generated_table.heading("col1", text="P maxima MPa", anchor=CENTER)
-                self.generated_table.heading("col2", text="µ minimo humedo", anchor=CENTER)
-                self.generated_table.heading("col3", text="µ minimo seco", anchor=CENTER)
-                self.generated_table.heading("col4", text="T maxima instantanea °C", anchor=CENTER)
-                self.generated_table.heading("col5", text="T maxima continua °C", anchor=CENTER)
-                self.generated_table.heading("col6", text="Velocidad maxima m/s", anchor=CENTER)
+                self.generated_table.heading("#0", text="Material de fricción", anchor=CENTER)
+                self.generated_table.heading("col1", text="P máxima MPa", anchor=CENTER)
+                self.generated_table.heading("col2", text="µ mínimo húmedo", anchor=CENTER)
+                self.generated_table.heading("col3", text="µ mínimo seco", anchor=CENTER)
+                self.generated_table.heading("col4", text="T máxima instantánea °C", anchor=CENTER)
+                self.generated_table.heading("col5", text="T máxima continua °C", anchor=CENTER)
+                self.generated_table.heading("col6", text="Velocidad máxima m/s", anchor=CENTER)
             if self.list2.get() == self.listaUnds[1]: 
-                self.generated_table.heading("#0", text="Material de friccion", anchor=CENTER)
-                self.generated_table.heading("col1", text="P maxima PSI", anchor=CENTER)
-                self.generated_table.heading("col2", text="µ minimo humedo", anchor=CENTER)
-                self.generated_table.heading("col3", text="µ minimo seco", anchor=CENTER)
-                self.generated_table.heading("col4", text="T maxima instantanea °F", anchor=CENTER)
-                self.generated_table.heading("col5", text="T maxima continua °F", anchor=CENTER)
-                self.generated_table.heading("col6", text="Velocidad maxima pie/min", anchor=CENTER)
+                self.generated_table.heading("#0", text="Material de fricción", anchor=CENTER)
+                self.generated_table.heading("col1", text="P máxima PSI", anchor=CENTER)
+                self.generated_table.heading("col2", text="µ mínimo húmedo", anchor=CENTER)
+                self.generated_table.heading("col3", text="µ mínimo seco", anchor=CENTER)
+                self.generated_table.heading("col4", text="T máxima instantánea °F", anchor=CENTER)
+                self.generated_table.heading("col5", text="T máxima continua °F", anchor=CENTER)
+                self.generated_table.heading("col6", text="Velocidad máxima pie/min", anchor=CENTER)
 
-            µ = float(self.textos[1].get())
+            µ = float(self.textos[2].get())
             if not self.list5.get():
                 raise ValueError
 
             base_path2 = pathlib.Path(__file__).parent.parent.resolve()
-            nombre_bd = 'Tabla materiales de friccion.db'
+            nombre_bd = resource_path('images/Tabla materiales de friccion.db')
             dbfile = os.path.join(base_path2, nombre_bd)
             conexion = sqlite3.connect(dbfile)
             cursor = conexion.cursor()
@@ -125,7 +127,7 @@ class ZapataESimetricaWindow(Frame):
             self.lbl = Label(self.table_window,text='Pa')
             self.lbl.place(x=10, y=450, width=50, height=20)
             self.lbl2 = Label(self.table_window)
-            self.lbl2.place(x=10, y=420, width=150, height=20)
+            self.lbl2.place(x=10, y=420, height=20)
             self.txttabla = Entry(self.table_window)
             self.txttabla.place(x=70, y=450, width=80, height=20)
 
@@ -145,29 +147,36 @@ class ZapataESimetricaWindow(Frame):
             self.submit.place(x=160, y=450)
         except:
             self.table_window.destroy()
-            messagebox.showerror(title="Error", message="Completa la seccion de coeficiente de friccion para obtener un valor")
+            messagebox.showerror(title="Error", message="Completa la seccion de coeficiente de friccion para obtener un valor", parent=self)
 
     def vent_temp(self):
         vent = TemperaturaWindow(Toplevel())
         unidades = self.list2.get()
-        material = self.lbl36["text"]
-        material.strip("}{")
+        material = self.lbl36["text"].strip("}{")
         ambiente = self.list5.get()
+        tambor = self.list6.get()
         vent.list2.set(unidades)
         vent.list4.set(material)
         vent.list5.set(ambiente)
+        vent.peso_especifico.set(tambor)
         vent.list2.event_generate('<<ComboboxSelected>>')
         vent.tipo_freno.set("Tambor")
         vent.tipo_freno.event_generate('<<ComboboxSelected>>')
         vent.tipo_freno["state"] = "disabled"
-        vent.list4.event_generate('<<ComboboxSelected>>')
         vent.list5.event_generate('<<ComboboxSelected>>')
+        vent.list4.event_generate('<<ComboboxSelected>>')
+        vent.peso_especifico.event_generate('<<ComboboxSelected>>')
         Dext = self.textos[8].get()
         Lt = self.textos[9].get()
         t = self.textos[10].get()
-        vent.textos2[0].insert(0,Lt)
-        vent.textos2[1].insert(0,Dext)
-        vent.textos2[2].insert(0,t)
+        if unidades == "Sistema Internacional":
+            vent.textos2[0].insert(0,float(Lt)/1000)
+            vent.textos2[1].insert(0,float(Dext)/1000)
+            vent.textos2[2].insert(0,float(t)/1000)
+        else:
+            vent.textos2[0].insert(0,Lt)
+            vent.textos2[1].insert(0,Dext)
+            vent.textos2[2].insert(0,t)
 
     def Calc_pasadores(self,R):
         Lp = float(self.textos[5].get())
@@ -213,18 +222,18 @@ class ZapataESimetricaWindow(Frame):
             Pa = float(self.txt18.get())
                 
             a = (4*r*(sin(radians(Θ2))))/(2*radians(Θ2)+(sin(radians(2*Θ2))))
-            a = round(a,3)
+            a = round(a,2)
 
             Rx = ((Padm*b*r)/2)*(2*radians(Θ2)+(sin(2*radians(Θ2))))
-            Rx = round(Rx,3)
+            Rx = round(Rx,2)
 
             Ry = ((µ*Padm*b*r)/2)*(2*radians(Θ2)+(sin(2*radians(Θ2))))
-            Ry = round(Ry,3)
+            Ry = round(Ry,2)
 
             N = 2*Padm*b*r*(sin(radians(Θ2)))
 
             T = a*µ*N
-            T = round(T,3)
+            T = round(T,2)
 
             R = sqrt((Rx**2)+(Ry**2))
             R = round(R,2)
@@ -235,14 +244,19 @@ class ZapataESimetricaWindow(Frame):
             if  self.textos[5].get() and self.textos[6].get() and self.textos[7].get():
                 self.Calc_pasadores(R)
                 FSp = self.FSp
+                FSp = round(FSp,2)
                 self.textos2[6].delete(0,"end")
                 self.textos2[6].insert(0,FSp)
 
             if self.textos[8].get() and self.textos[10].get() and self.textos[11].get():
                 self.Calc_tambor(2*r,Padm)
                 FSt = self.FSt
+                FSt = round(FSt,2)
                 self.textos2[7].delete(0,"end")
                 self.textos2[7].insert(0,FSt)
+
+            for entries in self.textos2:
+                entries.config(state=NORMAL)
 
             self.textos2[0].delete(0,"end")
             self.textos2[0].insert(0,a)
@@ -263,9 +277,9 @@ class ZapataESimetricaWindow(Frame):
             self.textos2[5].insert(0,FD)
         
         except ValueError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros por lo menos hasta la distancia x, incluyendo Pa, y debes ingresar solamente numeros")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los parámetros por lo menos hasta el ángulo Θ2, incluyendo Pa, y debes ingresar solamente números", parent=self)
         except AttributeError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros de inicializacion")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los parámetros de inicialización", parent=self)
 
     def operacionesT(self):
         try:
@@ -277,18 +291,18 @@ class ZapataESimetricaWindow(Frame):
             Pa = float(self.txt18.get())
 
             a = (4*r*(sin(radians(Θ2))))/(2*radians(Θ2)+(sin(radians(2*Θ2))))
-            a = round(a,3)
+            a = round(a,2)
 
             N = T/(a*µ)
 
             Padm = N/(2*b*r*(sin(radians(Θ2))))
-            Padm = round(Padm,3)
+            Padm = round(Padm,2)
 
             Rx = ((Padm*b*r)/2)*(2*radians(Θ2)+(sin(2*radians(Θ2))))
-            Rx = round(Rx,3)
+            Rx = round(Rx,2)
 
             Ry = ((µ*Padm*b*r)/2)*(2*radians(Θ2)+(sin(2*radians(Θ2))))
-            Ry = round(Ry,3)
+            Ry = round(Ry,2)
 
             R = sqrt((Rx**2)+(Ry**2))
             R = round(R,2)
@@ -299,14 +313,19 @@ class ZapataESimetricaWindow(Frame):
             if  self.textos[5].get() and self.textos[6].get() and self.textos[7].get():
                 self.Calc_pasadores(R)
                 FSp = self.FSp
+                FSp = round(FSp,2)
                 self.textos2[6].delete(0,"end")
                 self.textos2[6].insert(0,FSp)
 
             if self.textos[8].get() and self.textos[10].get() and self.textos[11].get():
                 self.Calc_tambor(2*r,Padm)
                 FSt = self.FSt
+                FSt = round(FSt,2)
                 self.textos2[7].delete(0,"end")
                 self.textos2[7].insert(0,FSt)
+
+            for entries in self.textos2:
+                entries.config(state=NORMAL)
             
             self.textos2[0].delete(0,"end")
             self.textos2[0].insert(0,a)
@@ -327,9 +346,9 @@ class ZapataESimetricaWindow(Frame):
             self.textos2[5].insert(0,FD)
 
         except ValueError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros por lo menos hasta la distancia x, incluyendo Pa, y debes ingresar solamente numeros")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los parámetros por lo menos hasta el ángulo Θ2, incluyendo Pa, y debes ingresar solamente números", parent=self)
         except AttributeError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros de inicializacion")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los parámetros de inicialización", parent=self)
 
     # def operacionesF(self):
     #     a1 = float(self.textos[0].get())
@@ -423,9 +442,9 @@ class ZapataESimetricaWindow(Frame):
                 self.list3["state"]="readonly"
                 for entries in self.textos:
                     entries.config(state=NORMAL)
-                self.textos[1]["state"]="disabled"
-                for entries in self.textos2:
-                    entries.config(state=NORMAL)
+                self.textos[2]["state"]="disabled"
+                # for entries in self.textos2:
+                #     entries.config(state=NORMAL)
             if self.list2.get() == self.listaUnds[1]:
                 i=0
                 for lbl in self.listunds:
@@ -440,14 +459,14 @@ class ZapataESimetricaWindow(Frame):
                 self.list3["state"]="readonly"
                 for entries in self.textos:
                     entries.config(state=NORMAL)
-                self.textos[1]["state"]="disabled"
-                for entries in self.textos2:
-                    entries.config(state=NORMAL)
+                self.textos[2]["state"]="disabled"
+                # for entries in self.textos2:
+                #     entries.config(state=NORMAL)
         self.list2.bind('<<ComboboxSelected>>', cambioUnds)
         self.list2.place(x=40, y=30)
 
-        self.info_button = Button(self, text="!", bg="yellow", command=self.info)
-        self.info_button.place(x=210, y=30, width=25, height=25)
+        # self.info_button = Button(self, text="!", bg="yellow", command=self.info)
+        # self.info_button.place(x=210, y=30, width=25, height=25)
 
         self.lbl_options = Label(self, text="Variables a calcular", bg="#A9A9A9", font=("Tahoma", 9))
         self.lbl_options.place(x=40, y=60)
@@ -510,31 +529,31 @@ class ZapataESimetricaWindow(Frame):
         self.list.current(0)
         self.list.place(x=40, y=80)
 
-        self.coef_label = Label(self, text="Para el coeficiente de friccion", bg="#A9A9A9", font=("Tahoma", 9))
+        self.coef_label = Label(self, text="Para el coeficiente de fricción", bg="#A9A9A9", font=("Tahoma", 9))
         self.coef_label.place(x=40, y=140)
-        self.lista_coef = ["Con material de friccion","Ingresando valor"]
+        self.lista_coef = ["Con material de fricción","Ingresando valor"]
         self.list3 = Combobox(self, width=25, values=self.lista_coef, state="disabled")
         def cambio_coef(event):
             if self.list3.get() == self.lista_coef[0]:
                 self.list5["state"]="readonly"
-                self.textos[1]["state"]="disabled"
+                self.textos[2]["state"]="disabled"
             if self.list3.get() == self.lista_coef[1]:
-                self.textos[1]["state"]="normal"
+                self.textos[2]["state"]="normal"
                 self.list4["state"]="disabled"
                 self.list5["state"]="readonly"
                 self.btn3["state"] = "normal"
         self.list3.bind('<<ComboboxSelected>>', cambio_coef)
         self.list3.place(x=40, y=160)
 
-        self.lista_mat_friccion_label = Label(self, text="Material de friccion", bg="#A9A9A9", font=("Tahoma", 9))
+        self.lista_mat_friccion_label = Label(self, text="Material de fricción", bg="#A9A9A9", font=("Tahoma", 9))
         self.lista_mat_friccion_label.place(x=420, y=140)
-        self.lista_mat_friccion = ["Fundicion de hierro","Metal sinterizado con tambor de acero","Metal sinterizado con tambor de fundicion de hierro",
+        self.lista_mat_friccion = ["Fundición de hierro","Metal sinterizado con tambor de acero","Metal sinterizado con tambor de fundición de hierro",
         "Madera","Cuero","Corcho","Fieltro","Asbesto tejido","Asbesto moldeado","Asbesto impregnado","Grafito de carbono","Cermet","Cuerda de asbesto arrollado",
         "Tira de asbesto tejido","Algodón tejido","Papel resiliente"]
         self.list4 = Combobox(self, width=20, values=self.lista_mat_friccion, state="disabled")
         def Mat(event):
             base_path2 = pathlib.Path(__file__).parent.parent.resolve()
-            nombre_bd = 'Tabla materiales de friccion.db'
+            nombre_bd = resource_path('images/Tabla materiales de friccion.db')
             dbfile = os.path.join(base_path2, nombre_bd)
             conexion = sqlite3.connect(dbfile)
             cursor = conexion.cursor()
@@ -544,10 +563,10 @@ class ZapataESimetricaWindow(Frame):
                     coeficiente_dato = cursor.fetchone()
                     cursor.execute(f"SELECT Presion_maxima FROM Internacional WHERE Material_de_friccion='{self.list4.get()}'")
                     presion_maxima_dato = cursor.fetchone()
-                    self.textos[1]["state"]="normal"
-                    self.textos[1].delete(0,"end")
-                    self.textos[1].insert(0, coeficiente_dato)
-                    self.textos[1]["state"]="disabled"
+                    self.textos[2]["state"]="normal"
+                    self.textos[2].delete(0,"end")
+                    self.textos[2].insert(0, coeficiente_dato)
+                    self.textos[2]["state"]="disabled"
 
                     self.txt18.delete(0,"end")
                     self.txt18.insert(0, presion_maxima_dato)
@@ -557,10 +576,10 @@ class ZapataESimetricaWindow(Frame):
                     coeficiente_dato = cursor.fetchone()
                     cursor.execute(f"SELECT Presion_maxima FROM Ingles WHERE Material_de_friccion='{self.list4.get()}'")
                     presion_maxima_dato = cursor.fetchone()
-                    self.textos[1]["state"]="normal"
-                    self.textos[1].delete(0,"end")
-                    self.textos[1].insert(0, coeficiente_dato)
-                    self.textos[1]["state"]="disabled"
+                    self.textos[2]["state"]="normal"
+                    self.textos[2].delete(0,"end")
+                    self.textos[2].insert(0, coeficiente_dato)
+                    self.textos[2]["state"]="disabled"
 
                     self.txt18.delete(0,"end")
                     self.txt18.insert(0, presion_maxima_dato)
@@ -571,10 +590,10 @@ class ZapataESimetricaWindow(Frame):
                     coeficiente_dato = cursor.fetchone()
                     cursor.execute(f"SELECT Presion_maxima FROM Internacional WHERE Material_de_friccion='{self.list4.get()}'")
                     presion_maxima_dato = cursor.fetchone()
-                    self.textos[1]["state"]="normal"
-                    self.textos[1].delete(0,"end")
-                    self.textos[1].insert(0, coeficiente_dato)
-                    self.textos[1]["state"]="disabled"
+                    self.textos[2]["state"]="normal"
+                    self.textos[2].delete(0,"end")
+                    self.textos[2].insert(0, coeficiente_dato)
+                    self.textos[2]["state"]="disabled"
 
                     self.txt18.delete(0,"end")
                     self.txt18.insert(0, presion_maxima_dato)
@@ -584,22 +603,35 @@ class ZapataESimetricaWindow(Frame):
                     coeficiente_dato = cursor.fetchone()
                     cursor.execute(f"SELECT Presion_maxima FROM Ingles WHERE Material_de_friccion='{self.list4.get()}'")
                     presion_maxima_dato = cursor.fetchone()
-                    self.textos[1]["state"]="normal"
-                    self.textos[1].delete(0,"end")
-                    self.textos[1].insert(0, coeficiente_dato)
-                    self.textos[1]["state"]="disabled"
+                    self.textos[2]["state"]="normal"
+                    self.textos[2].delete(0,"end")
+                    self.textos[2].insert(0, coeficiente_dato)
+                    self.textos[2]["state"]="disabled"
 
                     self.txt18.delete(0,"end")
                     self.txt18.insert(0, presion_maxima_dato)
                     self.lbl36.config(text=self.list4.get())
             conexion.close()
             self.btn3["state"] = "disabled"
+            self.list6["state"] = "readonly"
+            if self.list4.get() == "Fundición de hierro" or self.list4.get() == "Metal sinterizado con tambor de fundición de hierro":
+                self.list6.set("Fundición de hierro")
+                self.list6["state"] = "disabled"
+            elif self.list4.get() == "Grafito de carbono" or self.list4.get() == "Metal sinterizado con tambor de acero":
+                self.list6.set("Acero")
+                self.list6["state"] = "disabled"
         self.list4.bind('<<ComboboxSelected>>', Mat)
         self.list4.place(x=420, y=160)
 
+        self.lista_mat_tambor_lbl = Label(self, text="Material del tambor", bg="#A9A9A9", font=("Tahoma", 9))
+        self.lista_mat_tambor_lbl.place(x=590, y=140)
+        self.lista_mat_tambor = ["Fundición de hierro", "Acero"]     
+        self.list6 = Combobox(self, width=20, values=self.lista_mat_tambor, state="disabled")
+        self.list6.place(x=590, y=160)
+
         self.lista_humedo_seco_lbl = Label(self, text="Tipo de ambiente", bg="#A9A9A9", font=("Tahoma", 9))
         self.lista_humedo_seco_lbl.place(x=240, y=140) 
-        self.lista_humedo_seco = ["Ambiente humedo","Ambiente seco"]
+        self.lista_humedo_seco = ["Ambiente húmedo","Ambiente seco"]
         self.list5 = Combobox(self, width=20, values=self.lista_humedo_seco, state="disabled")
         def humedo_seco(event):
             if self.list3.get() == self.lista_coef[0]:
@@ -608,10 +640,10 @@ class ZapataESimetricaWindow(Frame):
         self.list5.place(x=240, y=160) 
 
         self.labels = []
-        textoslbl = ["T: Torque debido a la fuerza de fricción","r: Radio externo del tambor","µ: Coeficiente de friccion",
-        "b: Ancho de la zapata","Θ2: Angulo final material de friccion","Lp: Longitud del pasador",
-        "Dp: Diametro del pasador", "Sy material del pasador","Dt: Diametro externo del tambor",
-        "Lt: Longitud del tambor","t: Espesor de pared", "Sy material del tambor"]
+        textoslbl = ["T: Torque debido a la fuerza de fricción","r: Radio externo del tambor","µ: Coeficiente de fricción",
+        "b: Ancho de la zapata","Θ2: Ángulo final material de fricción","Lp: Longitud del pasador",
+        "Dp: Diámetro del pasador", "Sy: Material del pasador","Dt: Diámetro externo del tambor",
+        "Lt: Longitud del tambor","t: Espesor de pared", "Sy: Material del tambor"]
         for textos in textoslbl:
             self.labels.append(Label(self, text=textos, bg="#808080", font=("Tahoma", 9)))
         i=200
@@ -668,36 +700,36 @@ class ZapataESimetricaWindow(Frame):
             i += 30
 
         self.base_path = pathlib.Path(__file__).parent.parent.resolve()
-        self.image_filename = 'images\\Freno Zapata Externa Simetrica.png'
+        self.image_filename = resource_path('images\\Freno Zapata Externa Simetrica.png')
         self.image = Image.open(os.path.join(self.base_path, self.image_filename))
-        self.image = self.image.resize((350,400), Image.Resampling.LANCZOS)
+        self.image = self.image.resize((300,350), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)
         self.lbl17 = Label(self, image=self.img)
-        self.lbl17.place(x=1050, y=0, width=350, height=400)
+        self.lbl17.place(x=1100, y=0, width=300, height=350)
 
         self.base_path_2nd_part = pathlib.Path(__file__).parent.parent.resolve()
-        self.image_filename_2nd_part = 'images\\Zapata interna ancho de cara.png'
+        self.image_filename_2nd_part = resource_path('images\\Zapata interna ancho de cara.png')
         self.image2 = Image.open(os.path.join(self.base_path_2nd_part, self.image_filename_2nd_part))
-        self.image2 = self.image2.resize((350,380), Image.Resampling.LANCZOS)
+        self.image2 = self.image2.resize((300,330), Image.Resampling.LANCZOS)
         self.img2 = ImageTk.PhotoImage(self.image2)
         self.lbl_img2 = Label(self, image=self.img2)
-        self.lbl_img2.place(x=1050, y=350, width=350, height=380)
+        self.lbl_img2.place(x=1100, y=350, width=300, height=330)
 
         self.labels2 = []
         textoslabels2 = ["a: Distancia desde el pivote hasta el centro del tambor",
         "Padm: Presión máxima admisible ejercida sobre el material de fricción","Rx: Reacción del pasador en el eje x", 
-        "Ry: Reacción del pasador en el eje y","R: Reaccion en el pasador","Factor de diseño","Factor de seguridad del pasador",
+        "Ry: Reacción del pasador en el eje y","R: Reacción en el pasador","Factor de diseño","Factor de seguridad del pasador",
         "Factor de seguridad del tambor"]
         for textos in textoslabels2:
             self.labels2.append(Label(self, text=textos, bg="#808080", font=("Tahoma", 9)))
         i=200
         for cosas in self.labels2:
-            cosas.place(x=570, y=i)
+            cosas.place(x=590, y=i)
             i += 30
         
-        self.labels2[6].place(x=560, y=520)
+        self.labels2[6].place(x=590, y=520)
         self.labels2[6]["bg"]="#C0C0C0"
-        self.labels2[7].place(x=560, y=620)
+        self.labels2[7].place(x=590, y=620)
         self.labels2[7]["bg"]="#DCDCDC"
 
         self.textos2 = []
@@ -705,10 +737,10 @@ class ZapataESimetricaWindow(Frame):
             self.textos2.append(Entry(self, state="disabled"))
         i=200
         for parameters in self.textos2:
-            parameters.place(x=950, y=i, width=60)
+            parameters.place(x=980, y=i, width=60)
             i += 30
-        self.textos2[6].place(x=950, y=520)
-        self.textos2[7].place(x=950, y=620)
+        self.textos2[6].place(x=980, y=520)
+        self.textos2[7].place(x=980, y=620)
 
         self.listunds2 = []
         unds2 = ["mm","MPa","N","N","N","","",""]
@@ -716,24 +748,24 @@ class ZapataESimetricaWindow(Frame):
             self.listunds2.append(Label(self, bg="#808080"))
         i=200
         for unidades in self.listunds2:
-            unidades.place(x=1020, y=i)
+            unidades.place(x=1050, y=i)
             i += 30
-        self.listunds2[6].place(x=1020, y=520)
+        self.listunds2[6].place(x=1050, y=520)
         self.listunds2[6]["bg"] = "#C0C0C0"
-        self.listunds2[7].place(x=1020, y=620)
+        self.listunds2[7].place(x=1050, y=620)
         self.listunds2[7]["bg"] = "#DCDCDC"
 
         self.lbl18 = Label(self,text='Pa', bg="#A9A9A9")
-        self.lbl18.place(x=630, y=80)
+        self.lbl18.place(x=630, y=65)
         self.txt18 = Entry(self, state="disabled")
-        self.txt18.place(x=650, y=80, width=60)
+        self.txt18.place(x=650, y=65, width=60)
         self.lbl18_unidad = Label(self, bg="#A9A9A9")
-        self.lbl18_unidad.place(x=710, y=80)
+        self.lbl18_unidad.place(x=710, y=65)
         self.lbl36 = Label(self)
-        self.lbl36.place(x=650, y=120)
+        self.lbl36.place(x=650, y=105)
 
         self.btn3 = Button(self, text='tabla', command=self.tablaMaterial)
-        self.btn3.place(x=740, y=80, width=40, height=40)
+        self.btn3.place(x=740, y=65, width=40, height=40)
         self.solve_button = Button(self, text="Calcular", command=self.operacionesT)
         self.solve_button.place(x=950, y=650, width=50, height=50)
         self.limpiar_button = Button(self, text="Limpiar", command=self.limpiar)

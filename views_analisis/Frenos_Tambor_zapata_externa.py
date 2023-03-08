@@ -14,6 +14,8 @@ from Temperatura_new import TemperaturaWindow
 
 from tkinter.ttk import Combobox; PhotoImage; Combobox
 
+from app_path import resource_path
+
 class ZapataExternaWindow(Frame):
 
     def __init__(self, master=None):
@@ -36,28 +38,28 @@ class ZapataExternaWindow(Frame):
             self.generated_table.column("col6", width=100)
 
             if self.list2.get() == self.listaUnds[0]: 
-                self.generated_table.heading("#0", text="Material de friccion", anchor=CENTER)
-                self.generated_table.heading("col1", text="P maxima MPa", anchor=CENTER)
-                self.generated_table.heading("col2", text="µ minimo humedo", anchor=CENTER)
-                self.generated_table.heading("col3", text="µ minimo seco", anchor=CENTER)
-                self.generated_table.heading("col4", text="T maxima instantanea °C", anchor=CENTER)
-                self.generated_table.heading("col5", text="T maxima continua °C", anchor=CENTER)
-                self.generated_table.heading("col6", text="Velocidad maxima m/s", anchor=CENTER)
+                self.generated_table.heading("#0", text="Material de fricción", anchor=CENTER)
+                self.generated_table.heading("col1", text="P máxima MPa", anchor=CENTER)
+                self.generated_table.heading("col2", text="µ mínimo húmedo", anchor=CENTER)
+                self.generated_table.heading("col3", text="µ mínimo seco", anchor=CENTER)
+                self.generated_table.heading("col4", text="T máxima instantánea °C", anchor=CENTER)
+                self.generated_table.heading("col5", text="T máxima continua °C", anchor=CENTER)
+                self.generated_table.heading("col6", text="Velocidad máxima m/s", anchor=CENTER)
             if self.list2.get() == self.listaUnds[1]: 
-                self.generated_table.heading("#0", text="Material de friccion", anchor=CENTER)
-                self.generated_table.heading("col1", text="P maxima PSI", anchor=CENTER)
-                self.generated_table.heading("col2", text="µ minimo humedo", anchor=CENTER)
-                self.generated_table.heading("col3", text="µ minimo seco", anchor=CENTER)
-                self.generated_table.heading("col4", text="T maxima instantanea °F", anchor=CENTER)
-                self.generated_table.heading("col5", text="T maxima continua °F", anchor=CENTER)
-                self.generated_table.heading("col6", text="Velocidad maxima pie/min", anchor=CENTER)
+                self.generated_table.heading("#0", text="Material de fricción", anchor=CENTER)
+                self.generated_table.heading("col1", text="P máxima PSI", anchor=CENTER)
+                self.generated_table.heading("col2", text="µ mínimo húmedo", anchor=CENTER)
+                self.generated_table.heading("col3", text="µ mínimo seco", anchor=CENTER)
+                self.generated_table.heading("col4", text="T máxima instantánea °F", anchor=CENTER)
+                self.generated_table.heading("col5", text="T máxima continua °F", anchor=CENTER)
+                self.generated_table.heading("col6", text="Velocidad máxima pie/min", anchor=CENTER)
 
             µ = float(self.textos[1].get())
             if not self.list5.get():
                 raise ValueError
 
             base_path2 = pathlib.Path(__file__).parent.parent.resolve()
-            nombre_bd = 'Tabla materiales de friccion.db'
+            nombre_bd = resource_path('images/Tabla materiales de friccion.db')
             dbfile = os.path.join(base_path2, nombre_bd)
             conexion = sqlite3.connect(dbfile)
             cursor = conexion.cursor()
@@ -125,7 +127,7 @@ class ZapataExternaWindow(Frame):
             self.lbl = Label(self.table_window,text='Pa')
             self.lbl.place(x=10, y=450, width=50, height=20)
             self.lbl2 = Label(self.table_window)
-            self.lbl2.place(x=10, y=420, width=150, height=20)
+            self.lbl2.place(x=10, y=420, height=20)
             self.txttabla = Entry(self.table_window)
             self.txttabla.place(x=70, y=450, width=80, height=20)
 
@@ -143,29 +145,36 @@ class ZapataExternaWindow(Frame):
             self.submit.place(x=160, y=450)
         except:
             self.table_window.destroy()
-            messagebox.showerror(title="Error", message="Completa la seccion de coeficiente de friccion para obtener un valor")
+            messagebox.showerror(title="Error", message="Completa la sección de coeficiente de fricción para obtener un valor", parent=self)
 
     def vent_temp(self):
         vent = TemperaturaWindow(Toplevel())
         unidades = self.list2.get()
-        material = self.lbl36["text"]
-        material.strip("}{")
+        material = self.lbl36["text"].strip("}{")
         ambiente = self.list5.get()
+        tambor = self.list6.get()
         vent.list2.set(unidades)
         vent.list4.set(material)
         vent.list5.set(ambiente)
+        vent.peso_especifico.set(tambor)     
         vent.list2.event_generate('<<ComboboxSelected>>')
         vent.tipo_freno.set("Tambor")
         vent.tipo_freno.event_generate('<<ComboboxSelected>>')
         vent.tipo_freno["state"] = "disabled"
-        vent.list4.event_generate('<<ComboboxSelected>>')
         vent.list5.event_generate('<<ComboboxSelected>>')
+        vent.list4.event_generate('<<ComboboxSelected>>')
+        vent.peso_especifico.event_generate('<<ComboboxSelected>>')
         Dext = self.textos[13].get()
         Lt = self.textos[14].get()
         t = self.textos[15].get()
-        vent.textos2[0].insert(0,Lt)
-        vent.textos2[1].insert(0,Dext)
-        vent.textos2[2].insert(0,t)
+        if unidades == "Sistema Internacional":
+            vent.textos2[0].insert(0,float(Lt)/1000)
+            vent.textos2[1].insert(0,float(Dext)/1000)
+            vent.textos2[2].insert(0,float(t)/1000)
+        else:
+            vent.textos2[0].insert(0,Lt)
+            vent.textos2[1].insert(0,Dext)
+            vent.textos2[2].insert(0,t)
 
     def Calc_pasadores(self,R):
         Lp = float(self.textos[10].get())
@@ -346,49 +355,60 @@ class ZapataExternaWindow(Frame):
             if self.result == 1:
                 
                 F = (Mn-Mf)/a4
-                F = round(F,3)
+                F = round(F,2)
 
                 T = (a2*a1*a6*((a5/2)**2)*I1)/(sin(a9*(3.14/180)))
-                T = round(T,3)
+                T = round(T,2)
 
                 Fx = F*sin(Θ3)
-                Fx = round(Fx,3)
+                Fx = round(Fx,2)
                 Fy = F*cos(Θ3)
-                Fy = round(Fy,3)
+                Fy = round(Fy,2)
 
                 Rx = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(I2-(a2*I3))) - Fx
+                Ry = round(Rx,2)
                 Ry = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3-(a2*I2))) + Fy
+                Ry = round(Rx,2)
 
             if self.result == -1:
 
                 F = (Mn+Mf)/a4
-                F = round(F,3)
+                F = round(F,2)
 
                 T = (a2*a1*a6*((a5/2)**2)*I1)/(sin(a9*(3.14/180)))
-                T = round(T,3)
+                T = round(T,2)
 
                 Fx = F*sin(Θ3)
-                Fx = round(Fx,3)
+                Fx = round(Fx,2)
                 Fy = F*cos(Θ3)
-                Fy = round(Fy,3)
+                Fy = round(Fy,2)
 
                 Rx = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(I2+(a2*I3))) - Fx
+                Rx = round(Rx,2)
                 Ry = (((a1*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3+(a2*I2))) + Fy
+                Rx = round(Rx,2)
 
             R = sqrt((Rx**2)+(Ry**2))
+            R = round(R,2)
 
             if  self.textos[10].get() and self.textos[11].get() and self.textos[12].get():
                 self.Calc_pasadores(R)
                 FSp = self.FSp
+                FSp = round(FSp,2)
                 self.textos2[9].delete(0,"end")
                 self.textos2[9].insert(0,FSp)
 
             if self.textos[13].get() and self.textos[15].get() and self.textos[16].get():
                 self.Calc_tambor(a5,a1)
                 FSt = self.FSt
+                FSt = round(FSt,2)
                 self.textos2[10].delete(0,"end")
                 self.textos2[10].insert(0,FSt)
             FD = Pa/a1
+            FD = round(FD,2)
+
+            for entries in self.textos2:
+                entries.config(state=NORMAL)
 
             self.textos2[2].delete(0,"end")
             self.textos2[2].insert(0,F)
@@ -418,9 +438,9 @@ class ZapataExternaWindow(Frame):
             if self.torque_frenado_txt.get(T):
                 self.calc_torque_frenado(a1)
         except ValueError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros por lo menos hasta la distancia x, incluyendo Pa, y debes ingresar solamente numeros")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los párametros por lo menos hasta la distancia x, incluyendo Pa, y debes ingresar solamente números", parent=self)
         except AttributeError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros de inicializacion")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los párametros de inicialización", parent=self)
 
     def operacionesT(self):
         try:
@@ -508,44 +528,55 @@ class ZapataExternaWindow(Frame):
             if self.result == 1:
 
                 F = (Mn-Mf)/a4
-                F = round(F,3)
+                F = round(F,2)
 
                 Fx = F*sin(Θ3)
-                Fx = round(Fx,3)
+                Fx = round(Fx,2)
                 Fy = F*cos(Θ3)
-                Fy = round(Fy,3)
+                Fy = round(Fy,2)
 
                 Rx = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I2-(a2*I3))) - Fx
+                Rx = round(Rx,2)
                 Ry = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3-(a2*I2))) + Fy
+                Ry = round(Ry,2)
 
             if self.result == -1:
 
                 F = (Mn+Mf)/a4
-                F = round(F,3)
+                F = round(F,2)
 
                 Fx = F*sin(Θ3)
-                Fx = round(Fx,3)
+                Fx = round(Fx,2)
                 Fy = F*cos(Θ3)
-                Fy = round(Fy,3)
+                Fy = round(Fy,2)
 
                 Rx = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I2+(a2*I3))) - Fx
+                Rx = round(Rx,2)
                 Ry = (((Padm*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3+(a2*I2))) + Fy
+                Ry = round(Ry,2)
             
             R = sqrt((Rx**2)+(Ry**2))
+            R = round(R,2)
 
             if  self.textos[10].get() and self.textos[11].get() and self.textos[12].get():
                 self.Calc_pasadores(R)
                 FSp = self.FSp
+                FSp = round(FSp,2)
                 self.textos2[9].delete(0,"end")
                 self.textos2[9].insert(0,FSp)
 
             if self.textos[13].get() and self.textos[15].get() and self.textos[16].get():
                 self.Calc_tambor(a5,Padm)
                 FSt = self.FSt
+                FSt = round(FSt,2)
                 self.textos2[10].delete(0,"end")
                 self.textos2[10].insert(0,FSt)
 
             FD = Pa/Padm
+            FD = round(FD,2)
+
+            for entries in self.textos2:
+                entries.config(state=NORMAL)
             
             self.textos2[2].delete(0,"end")
             self.textos2[2].insert(0,Padm)
@@ -575,9 +606,9 @@ class ZapataExternaWindow(Frame):
             if self.torque_frenado_txt.get():
                 self.calc_torque_frenado(a1)
         except ValueError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros por lo menos hasta la distancia x, incluyendo Pa, y debes ingresar solamente numeros")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los párametros por lo menos hasta la distancia x, incluyendo Pa, y debes ingresar solamente números", parent=self)
         except AttributeError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros de inicializacion")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los párametros de inicialización", parent=self)
 
     def operacionesF(self):
         try:
@@ -663,50 +694,61 @@ class ZapataExternaWindow(Frame):
             if self.result == 1:
 
                 padm = (a1*a4)/(valor1-valor2)
-                padm = round(padm,3)
+                padm = round(padm,2)
 
                 T = (a2*padm*a6*((a5/2)**2)*I1)/(sin(a9*(3.14/180)))
-                T = round(T,3)
+                T = round(T,2)
                 
                 Fx = a1*sin(Θ3)
-                Fx = round(Fx,3)
+                Fx = round(Fx,2)
                 Fy = a1*cos(Θ3)
-                Fy = round(Fy,3)
+                Fy = round(Fy,2)
 
                 Rx = (((padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I2-(a2*I3))) - Fx
+                Rx = round(Rx,2)
                 Ry = (((padm*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3-(a2*I2))) + Fy
+                Ry = round(Ry,2)
 
             if self.result == -1:
                 
                 padm = (a1*a4)/(valor1+valor2)
-                padm = round(padm,3)
+                padm = round(padm,2)
 
                 T = (a2*padm*a6*((a5/2)**2)*I1)/(sin(a9*(3.14/180)))
-                T = round(T,3)
+                T = round(T,2)
 
                 Fx = a1*sin(Θ3)
-                Fx = round(Fx,3)
+                Fx = round(Fx,2)
                 Fy = a1*cos(Θ3)
-                Fy = round(Fy,3)
+                Fy = round(Fy,2)
 
                 Rx = (((padm*a6*(a5/2))/sin(a9*(3.14/180)))*(I2+(a2*I3))) - Fx
+                Rx = round(Rx,2)
                 Ry = (((padm*a6*(a5/2))/sin(a9*(3.14/180)))*(-I3+(a2*I2))) + Fy
+                Ry = round(Ry,2)
             
             R = sqrt((Rx**2)+(Ry**2))
+            R = round(R,2)
             
             if  self.textos[10].get() and self.textos[11].get() and self.textos[12].get():
                 self.Calc_pasadores(R)
                 FSp = self.FSp
+                FSp = round(FSp,2)
                 self.textos2[9].delete(0,"end")
                 self.textos2[9].insert(0,FSp)
 
             if self.textos[13].get() and self.textos[15].get() and self.textos[16].get():
                 self.Calc_tambor(a5,padm)
                 FSt = self.FSt
+                FSt = round(FSt,2)
                 self.textos2[10].delete(0,"end")
                 self.textos2[10].insert(0,FSt)
 
             FD = Pa/padm
+            FD = round(FD,2)
+
+            for entries in self.textos2:
+                entries.config(state=NORMAL)
             
             self.textos2[2].delete(0,"end")
             self.textos2[2].insert(0,padm)
@@ -736,14 +778,14 @@ class ZapataExternaWindow(Frame):
             if self.torque_frenado_txt.get():
                 self.calc_torque_frenado(T)
         except ValueError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros por lo menos hasta la distancia x, incluyendo Pa, y debes ingresar solamente numeros")
+            messagebox.showerror(title="Error", message="Debes ingresar todos los párametros por lo menos hasta la distancia x, incluyendo Pa, y debes ingresar solamente números", parent=self)
         except AttributeError:
-            messagebox.showerror(title="Error", message="Debes ingresar todos los parametros de inicializacion") 
+            messagebox.showerror(title="Error", message="Debes ingresar todos los párametros de inicialización", parent=self) 
 
     def info(self):
         self.mensaje = """Programa que resuelve casos generales tomando en cuenta cada zapata individualmente y un sistema de referencia
 que coincide con el pasador"""
-        messagebox.showinfo(title="Aclaratoria", message=self.mensaje)
+        messagebox.showinfo(title="Aclaratoria", message=self.mensaje, parent=self)
 
     def create_widget(self):
 
@@ -787,8 +829,8 @@ que coincide con el pasador"""
                 for entries in self.textos:
                     entries.config(state=NORMAL)
                 self.textos[1]["state"]="disabled"
-                for entries in self.textos2:
-                    entries.config(state=NORMAL)
+                # for entries in self.textos2:
+                #     entries.config(state=NORMAL)
                 self.torque_frenado_txt["state"]="normal"
                 self.torque_total_txt["state"]="normal"
             if self.list2.get() == self.listaUnds[1]:
@@ -810,15 +852,15 @@ que coincide con el pasador"""
                 for entries in self.textos:
                     entries.config(state=NORMAL)
                 self.textos[1]["state"]="disabled"
-                for entries in self.textos2:
-                    entries.config(state=NORMAL)
+                # for entries in self.textos2:
+                #     entries.config(state=NORMAL)
                 self.torque_frenado_txt["state"]="normal"
                 self.torque_total_txt["state"]="normal"
         self.list2.bind('<<ComboboxSelected>>', cambioUnds)
         self.list2.place(x=40, y=30)
 
         self.info_button = Button(self, text="!", bg="yellow", command=self.info)
-        self.info_button.place(x=240, y=30, width=25, height=25)
+        self.info_button.place(x=210, y=30, width=25, height=25)
 
         self.lbl_options = Label(self, text="Variables a calcular", bg="#A9A9A9", font=("Tahoma", 9))
         self.lbl_options.place(x=40, y=60)
@@ -899,12 +941,12 @@ que coincide con el pasador"""
         self.list_sentido_giro = Combobox(self, width=25, values=("horario", "antihorario"), state="disabled")
         self.list_sentido_giro.place(x=360, y=110)
 
-        self.label_ener_desener = Label(self, font=("Tahoma", 9))
+        self.label_ener_desener = Label(self, font=("Tahoma", 9), bg="#A9A9A9")
         self.label_ener_desener.place(x=360, y=30)
 
-        self.coef_label = Label(self, text="Para el coeficiente de friccion", bg="#A9A9A9", font=("Tahoma", 9))
+        self.coef_label = Label(self, text="Para el coeficiente de fricción", bg="#A9A9A9", font=("Tahoma", 9))
         self.coef_label.place(x=40, y=140)
-        self.lista_coef = ["Con material de friccion","Ingresando valor"]
+        self.lista_coef = ["Con material de fricción","Ingresando valor"]
         self.list3 = Combobox(self, width=25, values=self.lista_coef, state="disabled")
         def cambio_coef(event):
             if self.list3.get() == self.lista_coef[0]:
@@ -918,15 +960,15 @@ que coincide con el pasador"""
         self.list3.bind('<<ComboboxSelected>>', cambio_coef)
         self.list3.place(x=40, y=160)
 
-        self.lista_mat_friccion_label = Label(self, text="Material de friccion", bg="#A9A9A9", font=("Tahoma", 9))
+        self.lista_mat_friccion_label = Label(self, text="Material de fricción", bg="#A9A9A9", font=("Tahoma", 9))
         self.lista_mat_friccion_label.place(x=420, y=140)
-        self.lista_mat_friccion = ["Fundicion de hierro","Metal sinterizado con tambor de acero","Metal sinterizado con tambor de fundicion de hierro",
+        self.lista_mat_friccion = ["Fundición de hierro","Metal sinterizado con tambor de acero","Metal sinterizado con tambor de fundición de hierro",
         "Madera","Cuero","Corcho","Fieltro","Asbesto tejido","Asbesto moldeado","Asbesto impregnado","Grafito de carbono","Cermet",
         "Cuerda de asbesto arrollado","Tira de asbesto tejido","Algodón tejido","Papel resiliente"]
         self.list4 = Combobox(self, width=20, values=self.lista_mat_friccion, state="disabled")
         def Mat(event):
             base_path2 = pathlib.Path(__file__).parent.parent.resolve()
-            nombre_bd = 'Tabla materiales de friccion.db'
+            nombre_bd = resource_path('images/Tabla materiales de friccion.db')
             dbfile = os.path.join(base_path2, nombre_bd)
             conexion = sqlite3.connect(dbfile)
             cursor = conexion.cursor()
@@ -986,12 +1028,25 @@ que coincide con el pasador"""
                     self.lbl36.config(text=self.list4.get())
             conexion.close()
             self.btn3["state"] = "disabled"
+            self.list6["state"] = "readonly"
+            if self.list4.get() == "Fundición de hierro" or self.list4.get() == "Metal sinterizado con tambor de fundición de hierro":
+                self.list6.set("Fundición de hierro")
+                self.list6["state"] = "disabled"
+            elif self.list4.get() == "Grafito de carbono" or self.list4.get() == "Metal sinterizado con tambor de acero":
+                self.list6.set("Acero")
+                self.list6["state"] = "disabled"
         self.list4.bind('<<ComboboxSelected>>', Mat)
         self.list4.place(x=420, y=160)
 
+        self.lista_mat_tambor_lbl = Label(self, text="Material del tambor", bg="#A9A9A9", font=("Tahoma", 9))
+        self.lista_mat_tambor_lbl.place(x=590, y=140)
+        self.lista_mat_tambor = ["Fundición de hierro", "Acero"]     
+        self.list6 = Combobox(self, width=20, values=self.lista_mat_tambor, state="disabled")
+        self.list6.place(x=590, y=160)
+
         self.lista_humedo_seco_lbl = Label(self, text="Tipo de ambiente", bg="#A9A9A9", font=("Tahoma", 9))
         self.lista_humedo_seco_lbl.place(x=240, y=140) 
-        self.lista_humedo_seco = ["Ambiente humedo","Ambiente seco"]
+        self.lista_humedo_seco = ["Ambiente húmedo","Ambiente seco"]
         self.list5 = Combobox(self, width=20, values=self.lista_humedo_seco, state="disabled")
         def humedo_seco(event):
             if self.list3.get() == self.lista_coef[0]:
@@ -1000,12 +1055,12 @@ que coincide con el pasador"""
         self.list5.place(x=240, y=160)
 
         self.labels = []
-        textoslbl = ["F: fuerza de accionamiento","µ: Coeficiente de friccion","a: Distancia desde el pivote hasta el centro del tambor",
-        "c: Distancia desde el pto de aplicacion de la fuerza hasta el centro del pivote","D: Diametro del tambor",
-        "b: Ancho de la zapata","Θ1: Angulo entre el pasador y el material de friccion","Θ2: Angulo final material de friccion",
+        textoslbl = ["F: Fuerza de accionamiento","µ: Coeficiente de friccion","a: Distancia desde el pivote hasta el centro del tambor",
+        "c: Distancia desde el pto de aplicacion de la fuerza hasta el centro del pivote","D: Diámetro del tambor",
+        "b: Ancho de la zapata","Θ1: Ángulo entre el pasador y el material de fricción","Θ2: Ángulo final material de fricción",
         "y: Distancia vertical desde el eje de referencia x hasta el pasador","x: Distancia horizontal desde el eje de referencia y hasta el pasador",
-        "Lp: Longitud del pasador","Dp: Diametro del pasador", "Sy material del pasador", "Dt: Diametro externo del tambor", "Lt: Longitud del tambor",
-        "t: Espesor de pared", "Sy material del tambor"]
+        "Lp: Longitud del pasador","Dp: Diámetro del pasador", "Sy: Material del pasador", "Dt: Diámetro externo del tambor", "Lt: Longitud del tambor",
+        "t: Espesor de pared", "Sy: Material del tambor"]
         for textos in textoslbl:
             self.labels.append(Label(self, text=textos, bg="#808080", font=("Tahoma", 9)))
         i=200
@@ -1039,35 +1094,35 @@ que coincide con el pasador"""
             i += 30
 
         self.base_path = pathlib.Path(__file__).parent.parent.resolve()
-        self.image_filename = 'images\\Freno Zapata Externa.png'
+        self.image_filename = resource_path('images\\Freno Zapata Externa.png')
         self.image = Image.open(os.path.join(self.base_path, self.image_filename))
-        self.image = self.image.resize((350,350), Image.Resampling.LANCZOS)
+        self.image = self.image.resize((300,350), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)
         self.lbl17 = Label(self, image=self.img)
-        self.lbl17.place(x=1050, y=0, width=350, height=350)
+        self.lbl17.place(x=1100, y=0, width=300, height=350)
 
         self.base_path_2nd_part = pathlib.Path(__file__).parent.parent.resolve()
-        self.image_filename_2nd_part = 'images\\Zapata externa ancho de cara.png'
+        self.image_filename_2nd_part = resource_path('images\\Zapata externa ancho de cara.png')
         self.image2 = Image.open(os.path.join(self.base_path_2nd_part, self.image_filename_2nd_part))
-        self.image2 = self.image2.resize((350,380), Image.Resampling.LANCZOS)
+        self.image2 = self.image2.resize((300,330), Image.Resampling.LANCZOS)
         self.img2 = ImageTk.PhotoImage(self.image2)
         self.lbl_img2 = Label(self, image=self.img2)
-        self.lbl_img2.place(x=1050, y=350, width=350, height=380)
+        self.lbl_img2.place(x=1100, y=350, width=300, height=330)
 
         self.labels2 = []
-        textoslabels2 = ["Θa: Angulo donde se aplica la presión máxima admisible","T: Torque debido a la fuerza de fricción",
+        textoslabels2 = ["Θa: Ángulo donde se aplica la presión máxima admisible","T: Torque debido a la fuerza de fricción",
         "Padm: Presión máxima admisible ejercida sobre el material de fricción","Fx: Componente en el eje x de la fuerza de accionamiento",
         "Fy: Componente en el eje y de la fuerza de accionamiento", "Rx: Reacción del pasador en el eje x", "Ry: Reacción del pasador en el eje y",
-        "R: Reaccion en el pasador", "Factor de diseño", "Factor de seguridad del pasador", "Factor de seguridad del tambor"]
+        "R: Reacción en el pasador", "Factor de diseño", "Factor de seguridad del pasador", "Factor de seguridad del tambor"]
         for textos in textoslabels2:
             self.labels2.append(Label(self, text=textos, bg="#808080", font=("Tahoma", 9)))
         i=200
         for cosas in self.labels2:
-            cosas.place(x=560, y=i)
+            cosas.place(x=590, y=i)
             i += 30
-        self.labels2[9].place(x=560, y=520)
+        self.labels2[9].place(x=590, y=520)
         self.labels2[9]["bg"]="#C0C0C0"
-        self.labels2[10].place(x=560, y=620)
+        self.labels2[10].place(x=590, y=620)
         self.labels2[10]["bg"]="#DCDCDC"
 
         self.textos2 = []
@@ -1075,10 +1130,10 @@ que coincide con el pasador"""
             self.textos2.append(Entry(self, state="disabled"))
         i=200
         for parameters in self.textos2:
-            parameters.place(x=950, y=i, width=60)
+            parameters.place(x=980, y=i, width=60)
             i += 30
-        self.textos2[9].place(x=950, y=520)
-        self.textos2[10].place(x=950, y=620)
+        self.textos2[9].place(x=980, y=520)
+        self.textos2[10].place(x=980, y=620)
 
         self.listunds2 = []
         unds2 = ["°","N.mm","MPa","N","N","N","N","N","","",""]
@@ -1086,24 +1141,24 @@ que coincide con el pasador"""
             self.listunds2.append(Label(self, bg="#808080"))
         i=200
         for unidades in self.listunds2:
-            unidades.place(x=1020, y=i)
+            unidades.place(x=1050, y=i)
             i += 30
-        self.listunds2[9].place(x=1020, y=520)
+        self.listunds2[9].place(x=1050, y=520)
         self.listunds2[9]["bg"] = "#C0C0C0"
-        self.listunds2[10].place(x=1020, y=620)
+        self.listunds2[10].place(x=1050, y=620)
         self.listunds2[10]["bg"] = "#DCDCDC"  
 
         self.lbl18 = Label(self,text='Pa', bg="#A9A9A9")
-        self.lbl18.place(x=630, y=80)
+        self.lbl18.place(x=630, y=65)
         self.txt18 = Entry(self, state="disabled")
-        self.txt18.place(x=650, y=80, width=60)
+        self.txt18.place(x=650, y=65, width=60)
         self.lbl18_unidad = Label(self, bg="#A9A9A9")
-        self.lbl18_unidad.place(x=710, y=80)
+        self.lbl18_unidad.place(x=710, y=65)
         self.lbl36 = Label(self)
-        self.lbl36.place(x=650, y=120)
+        self.lbl36.place(x=610, y=105)
 
         self.btn3 = Button(self, text='tabla', command=self.tablaMaterial)
-        self.btn3.place(x=740, y=80, width=40, height=40)
+        self.btn3.place(x=740, y=65, width=40, height=40)
         self.solve_button = Button(self, text="Calcular", command=self.operacionesF)
         self.solve_button.place(x=950, y=650, width=50, height=50)
         self.limpiar_button = Button(self, text="Limpiar", command=self.limpiar)
@@ -1111,7 +1166,7 @@ que coincide con el pasador"""
         self.temp_button = Button(self, text="Calc.\ntemperatura", command=self.vent_temp)
         self.temp_button.place(x=870, y=650, width=75,height=50)
 
-        self.nro_zapatas_label = Label(self, text="Numero de zapatas", bg="#A9A9A9", font=("Tahoma", 9))
+        self.nro_zapatas_label = Label(self, text="Número de zapatas", bg="#A9A9A9", font=("Tahoma", 9))
         self.nro_zapatas_label.place(x=800, y=10)
         self.nro_zapatas = Combobox(self, width=20, values=["1","2","3","4"], state="disabled")
         def nro_zapatas(event):
@@ -1120,14 +1175,14 @@ que coincide con el pasador"""
                 self.zapatas.append(Entry(self))
         self.nro_zapatas.bind('<<ComboboxSelected>>', nro_zapatas)
         self.nro_zapatas.place(x=800, y=30)
-        self.torque_frenado_lbl =  Label(self, text="Torque de frenado", bg="#A9A9A9", font=("Tahoma", 9))
+        self.torque_frenado_lbl =  Label(self, text="Agregar torque necesario para frenar", bg="#A9A9A9", font=("Tahoma", 9))
         self.torque_frenado_lbl.place(x=800, y=60)
         self.torque_frenado_txt = Entry(self, state="disabled")
-        self.torque_frenado_txt.place(x=920, y=60, width=60)
-        self.torque_total_lbl =  Label(self, text="Torque total", bg="#A9A9A9", font=("Tahoma", 9))
+        self.torque_frenado_txt.place(x=1030, y=60, width=60)
+        self.torque_total_lbl =  Label(self, text="Torque total de frenado de la máquina", bg="#A9A9A9", font=("Tahoma", 9))
         self.torque_total_lbl.place(x=800, y=80)
         self.torque_total_txt = Entry(self, state="disabled")
-        self.torque_total_txt.place(x=920, y=80, width=60)
+        self.torque_total_txt.place(x=1030, y=80, width=60)
 
         self.lbl_comparacion_torque = Label(self, bg="#A9A9A9", font=("Tahoma", 9))
         self.lbl_comparacion_torque.place(x=920, y=100)
@@ -1136,7 +1191,7 @@ if __name__ == "__main__":
     root = Tk()
     root.wm_title("Calculos de validacion para frenos y embragues de zapata externa")
     base_path_3rd_part = pathlib.Path(__file__).parent.parent.resolve()
-    image_filename_3rd_part = "images\\Logo ANFRA.ico"
+    image_filename_3rd_part = resource_path("images\\Logo ANFRA.ico")
     icono = os.path.join(base_path_3rd_part, image_filename_3rd_part)
     root.iconbitmap(icono)
     ZapataExternaWindow(root).mainloop()

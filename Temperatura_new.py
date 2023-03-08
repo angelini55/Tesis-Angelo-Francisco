@@ -7,6 +7,8 @@ from tkinter.ttk import Combobox
 
 from PIL import Image, ImageTk
 
+from app_path import resource_path_prymary
+
 
 class TemperaturaWindow(Frame):
 
@@ -17,8 +19,8 @@ class TemperaturaWindow(Frame):
         self.create_widgets()
 
     def change_graph(self):
-        if self.image_filename == 'images\\hc y hr temperatura.png':
-            self.image_filename = 'images\\FMC temperatura.png'
+        if self.image_filename == resource_path_prymary('images\\hc y hr temperatura.png'):
+            self.image_filename = resource_path_prymary('images\\FMC temperatura.png')
             self.base_path = pathlib.Path(__file__).parent.resolve()
             self.image = Image.open(os.path.join(self.base_path, self.image_filename))
             self.image = self.image.resize((350,350), Image.Resampling.LANCZOS)
@@ -26,13 +28,23 @@ class TemperaturaWindow(Frame):
             self.lbl_img1 = Label(self, image=self.img)
             self.lbl_img1.place(x=750, y=40, width=350, height=350)
         else:
-            self.image_filename = 'images\\hc y hr temperatura.png'
+            self.image_filename = resource_path_prymary('images\\hc y hr temperatura.png')
             self.base_path = pathlib.Path(__file__).parent.resolve()
             self.image = Image.open(os.path.join(self.base_path, self.image_filename))
             self.image = self.image.resize((350,350), Image.Resampling.LANCZOS)
             self.img = ImageTk.PhotoImage(self.image)
             self.lbl_img1 = Label(self, image=self.img)
             self.lbl_img1.place(x=750, y=40, width=350, height=350)
+
+    def limpiar(self):
+        
+        for caja_de_texto in self.textos:
+            caja_de_texto.delete(0,"end")
+        for caja_de_texto in self.textos2:
+            caja_de_texto.delete(0,"end")
+        for caja_de_texto in self.textos3:
+            caja_de_texto.delete(0,"end")
+        self.temp_text.delete(0,"end")
     
     def calculo_deltaT(self):
         Tamb = float(self.textos[0].get())
@@ -46,7 +58,7 @@ class TemperaturaWindow(Frame):
         V = float(self.textos[8].get())
 
         if self.list2.get() == "Sistema Internacional":
-            E = (I/204.10)*abs(((wi*(2*pi/60))**2)-((wf*(2*pi/60))**2))
+            E = (I/0.2041)*abs(((wi*(2*pi/60))**2)-((wf*(2*pi/60))**2))
             V = V*3.28084
         else:
             E = (I/18672)*abs(((wi*(2*pi/60))**2)-((wf*(2*pi/60))**2))
@@ -68,24 +80,36 @@ class TemperaturaWindow(Frame):
             t = float(self.textos2[3].get())
             W = (pi/3)*h*((((Ri+t)**3)-((ri+t)**3)/Ri-ri)-((Ri**3)-(ri**3)/Ri-ri))*gamma
 
-        deltaT = E/(W*C)
         if self.list2.get() == "Sistema Internacional":
-            deltaT = (deltaT*(9/5))+32
+            W = W/9.81
+
+        deltaT = E/(W*C)
         deltaT = round(deltaT,2)
 
-        self.delta_T_textbox.delete(0,"end")
-        self.delta_T_textbox.insert(0,deltaT)
-
         hc = log(deltaT,13.74)
-        hc = hc*(10**-6)
+        if self.list2.get() == "Sistema Internacional":
+            hc = hc*55.0803
+        if self.list2.get() == "Sistema Ingles":
+            hc = hc*(10**-6)
         hc = round(hc,8)
 
         hr = 1.95*exp((2.38*(10**-3))*deltaT)
-        hr = hr*(10**-6)
-        hr = round(hr, 8)
+        if self.list2.get() == "Sistema Internacional":
+            hr = hr*55.0803
+        if self.list2.get() == "Sistema Ingles":
+            hr = hr*(10**-6)
+        hr = round(hr,8)
 
         FMC = (4.24107*(10**-9))*(V**5) - (1.13467*(10**-6))*(V**4) + (1.20833*(10**-4))*(V**3) - (7.33185*(10**-3))*(V**2) + 0.306702*(V)+ 0.1
         FMC = round(FMC,2)
+
+        if self.list2.get() == "Sistema Internacional":
+            deltaT = (deltaT*(9/5))+32
+        self.delta_T_textbox.delete(0,"end")
+        self.delta_T_textbox.insert(0,deltaT)
+
+        for entries in self.textos3:
+            entries.config(state=NORMAL)
 
         self.textos3[0].delete(0,"end")
         self.textos3[0].insert(0,hc)
@@ -97,6 +121,7 @@ class TemperaturaWindow(Frame):
         self.textos3[2].insert(0,FMC)    
 
         U = hr + FMC*hc
+        U = round(U,8)
 
         if self.tipo_freno.get() == "Disco":
             D = float(self.textos2[0].get())
@@ -118,12 +143,17 @@ class TemperaturaWindow(Frame):
         ß = (U*A)/(W*C)
         Ita = (Tt/V_activa)*3600
 
-        Tmax = Tamb + (deltaT)/(1-(e**(-ß*Ita)))
+        Tmax = Tamb + ((deltaT)/(1-(e**(-ß*Ita))))
+        Tmax = round(Tmax,2)
         if float(self.temp_text.get()) > Tmax:
             self.comprobacion_lbl["text"] = "El material resiste la \ntemperatura máxima de trabajo"
         else:
             self.comprobacion_lbl["text"] = "El material no resiste la \ntemperatura máxima de trabajo"
         Tmin = Tmax - deltaT
+        Tmin = round(Tmin,2)
+
+        for entries in self.textos4:
+            entries.config(state=NORMAL)
 
         self.textos4[0].delete(0,"end")
         self.textos4[0].insert(0,A)
@@ -149,8 +179,8 @@ class TemperaturaWindow(Frame):
         frame_entrada_temp = Frame(self, width=1200, height=210, bg="#808080")
         frame_entrada_temp.pack()
 
-        Internacional = ["°C","rpm","rpm","kgm.m.s","N/m^3","Joule/(kgm.°C)","","horas","m/s","mm","mm","mm","Joule/(m2.s.°C)","Joule/(m2.s.°C)","",
-        "mm^2","Joule/(m^2.s.°C)","s^-1","°C","°C"]
+        Internacional = ["°C","rpm","rpm","kgm.m.s","N/m^3","Joule/(kgm.°C)","","horas","m/s","m","m","m","Joule/(m2.s.°C)","Joule/(m2.s.°C)","",
+        "m^2","Joule/(m^2.s.°C)","s^-1","°C","°C"]
         Ingles = ["°F","rpm","rpm","lbm.pulg.s","lb/pulg^3","Btu/(lbm.°F)","","horas","pie/s","in","in","in","Btu/(pulg2.s.°F)","Btu/(pulg2.s.°F)","",
         "in^2","Btu/(pulg2.s.°F)","s^-1","°F","°F"]
 
@@ -181,10 +211,10 @@ class TemperaturaWindow(Frame):
                 self.textos[5]["state"]="disabled"
                 for entries in self.textos2:
                     entries.config(state=NORMAL)
-                for entries in self.textos3:
-                    entries.config(state=NORMAL)
-                for entries in self.textos4:
-                    entries.config(state=NORMAL)
+                # for entries in self.textos3:
+                #     entries.config(state=NORMAL)
+                # for entries in self.textos4:
+                #     entries.config(state=NORMAL)
                 self.tipo_freno["state"] = "readonly"
                 self.delta_T_textbox["state"] = "normal"
                 self.peso_especifico["state"] = "readonly"
@@ -210,10 +240,10 @@ class TemperaturaWindow(Frame):
                 self.textos[5]["state"]="disabled"
                 for entries in self.textos2:
                     entries.config(state=NORMAL)
-                for entries in self.textos3:
-                    entries.config(state=NORMAL)
-                for entries in self.textos4:
-                    entries.config(state=NORMAL)
+                # for entries in self.textos3:
+                #     entries.config(state=NORMAL)
+                # for entries in self.textos4:
+                #     entries.config(state=NORMAL)
                 self.tipo_freno["state"] = "readonly"
                 self.delta_T_textbox["state"] = "normal"
                 self.peso_especifico["state"] = "readonly"
@@ -230,7 +260,7 @@ class TemperaturaWindow(Frame):
                 for x in self.textos2:
                     x.destroy()
                 self.labels2 = []
-                textoslbl2 = ["D: Diametro externo","d: Diametro interno","t: Espesor"]
+                textoslbl2 = ["D: Diámetro externo","d: Diámetro interno","t: Espesor"]
                 for textos in textoslbl2:
                     self.labels2.append(Label(self, text=textos, font=("Tahoma", 9), bg="#A9A9A9"))
                 i=390
@@ -251,7 +281,7 @@ class TemperaturaWindow(Frame):
                 for x in self.textos2:
                     x.destroy()
                 self.labels2 = []
-                textoslbl2 = ["L: Longitud del tambor","D: Diametro","t: Espesor"]
+                textoslbl2 = ["L: Longitud del tambor","D: Diámetro","t: Espesor"]
                 for textos in textoslbl2:
                     self.labels2.append(Label(self, text=textos, font=("Tahoma", 9), bg="#A9A9A9"))
                 i=390
@@ -291,11 +321,13 @@ class TemperaturaWindow(Frame):
         self.tipo_freno.set("Disco")
         self.tipo_freno.place(x=230, y=30)
 
+        Label(self, text="Datos de entrada", font=("Tahoma", 9, "bold"), bg="#A9A9A9").place(x=40, y=60)
+
 
         self.labels = []
         textoslbl = ["Tamb: Temperatura ambiente","wi: Velocidad angular inicial","wf: Velocidad angular final",
-        "I: Inercia rotatoria equivalente","γ: Peso especifico del material del disco, tambor o cono",
-        "C: Capacidad termica especifica","Veces que se activa","Tiempo de trabajo","V: Velocidad del aire"]
+        "I: Inercia rotatoria equivalente","γ: Peso específico del material del disco, tambor o cono",
+        "C: Capacidad térmica específica","Veces que se activa","Tiempo de trabajo","V: Velocidad del aire"]
         for textos in textoslbl:
             self.labels.append(Label(self, text=textos, font=("Tahoma", 9), bg="#A9A9A9"))
         i=90
@@ -310,7 +342,7 @@ class TemperaturaWindow(Frame):
         for parameters in self.textos:
             parameters.place(x=400, y=i, width=60)
             i += 30
-        self.peso_especifico = Combobox(self, width=15, values=["Acero","Fundicion de hierro"], state="disabled")
+        self.peso_especifico = Combobox(self, width=15, values=["Acero","Fundición de hierro"], state="disabled")
         def peso_especifico(event):
             self.capacidad_termica["state"] = "readonly"
             if self.peso_especifico.get() == "Acero":
@@ -324,7 +356,7 @@ class TemperaturaWindow(Frame):
                     self.textos[4].delete(0,"end")
                     self.textos[4].insert(0,0.282)
                     self.textos[4]["state"] = "disabled"
-            if self.peso_especifico.get() == "Fundicion de hierro":
+            if self.peso_especifico.get() == "Fundición de hierro":
                 if self.list2.get() == "Sistema Internacional":
                     self.textos[4]["state"] = "normal"
                     self.textos[4].delete(0,"end")
@@ -354,13 +386,13 @@ class TemperaturaWindow(Frame):
                         self.textos[5].delete(0,"end")
                         self.textos[5].insert(0,0.12)
                         self.textos[5]["state"] = "disabled"
-                if self.peso_especifico.get() == "Fundicion de hierro":
+                if self.peso_especifico.get() == "Fundición de hierro":
                     if self.list2.get() == "Sistema Internacional":
                         self.textos[5]["state"] = "normal"
                         self.textos[5].delete(0,"end")
                         self.textos[5].insert(0,591.18)
                         self.textos[5]["state"] = "disabled"
-                    if self.list2.get() == "Sistema Internacional":
+                    if self.list2.get() == "Sistema Ingles":
                         self.textos[5]["state"] = "normal"
                         self.textos[5].delete(0,"end")
                         self.textos[5].insert(0,0.12)
@@ -379,7 +411,7 @@ class TemperaturaWindow(Frame):
 
 
         self.labels2 = []
-        textoslbl2 = ["D: Diametro externo","d: Diametro interno","t: Espesor"]
+        textoslbl2 = ["D: Diámetro externo","d: Diámetro interno","t: Espesor"]
         for textos in textoslbl2:
             self.labels2.append(Label(self, text=textos, font=("Tahoma", 9), bg="#A9A9A9"))
         i=390
@@ -396,7 +428,7 @@ class TemperaturaWindow(Frame):
             i += 30
 
         self.listunds2 = []
-        unds = ["mm","mm","mm"]
+        unds = ["m","m","m"]
         for unidades in unds:
             self.listunds2.append(Label(self, bg="#A9A9A9"))
         i=390
@@ -412,7 +444,7 @@ class TemperaturaWindow(Frame):
         self.delta_T_textbox.place(x=770, y=10, width=60)
 
         self.base_path = pathlib.Path(__file__).parent.resolve()
-        self.image_filename = 'images\\hc y hr temperatura.png'
+        self.image_filename = resource_path_prymary('images\\hc y hr temperatura.png')
         self.image = Image.open(os.path.join(self.base_path, self.image_filename))
         self.image = self.image.resize((350,350), Image.Resampling.LANCZOS)
         self.img = ImageTk.PhotoImage(self.image)
@@ -450,6 +482,9 @@ class TemperaturaWindow(Frame):
             i += 30
 
         Button(self, text="Calcular", command=self.calculo_deltaT).place(x=200, y=500, height=50, width=80)
+        Button(self, text="Limpiar", command=self.limpiar).place(x=320, y=500, height=50, width=80)
+
+        Label(self, text="Resultados", font=("Tahoma", 9, "bold"), bg="#808080").place(x=40, y=570)
 
         self.labels4 = []
         textoslbl4 = ["A: Área de superficie disipadora de calor","U: Coeficiente de transferencia térmica global",
@@ -471,7 +506,7 @@ class TemperaturaWindow(Frame):
             i += 30
 
         self.listunds4 = []
-        unds = ["mm^2","Joule/(m^2.s.°C)","s^-1","°C","°C"]
+        unds = ["m^2","Joule/(m^2.s.°C)","s^-1","°C","°C"]
         for unidades in unds:
             self.listunds4.append(Label(self, bg="#808080"))
         i=600
@@ -479,7 +514,7 @@ class TemperaturaWindow(Frame):
             unidades.place(x=470, y=i)
             i += 30
 
-        self.temp_lbl = Label(self, text="Temperatura maxima instantanea", font=("Tahoma", 9), bg="#A9A9A9")
+        self.temp_lbl = Label(self, text="Temperatura máxima instantánea", font=("Tahoma", 9), bg="#A9A9A9")
         self.temp_lbl.place(x=530, y=490)
         self.temp_text = Entry(self)
         self.temp_text.place(x=1020, y=490, width=60)
@@ -491,7 +526,7 @@ class TemperaturaWindow(Frame):
 
         self.lista_humedo_seco_lbl = Label(self, text="Tipo de ambiente", bg="#A9A9A9", font=("Tahoma", 9))
         self.lista_humedo_seco_lbl.place(x=540, y=90) 
-        self.lista_humedo_seco = ["Ambiente humedo","Ambiente seco"]
+        self.lista_humedo_seco = ["Ambiente húmedo","Ambiente seco"]
         self.list5 = Combobox(self, width=20, values=self.lista_humedo_seco, state="disabled")
         def humedo_seco(event):
             #if self.list3.get() == self.lista_coef[0]:
@@ -499,15 +534,15 @@ class TemperaturaWindow(Frame):
         self.list5.bind('<<ComboboxSelected>>', humedo_seco)
         self.list5.place(x=540, y=110)
 
-        self.lista_mat_friccion_label = Label(self, text="Material de friccion", bg="#A9A9A9", font=("Tahoma", 9))
+        self.lista_mat_friccion_label = Label(self, text="Material de fricción", bg="#A9A9A9", font=("Tahoma", 9))
         self.lista_mat_friccion_label.place(x=540, y=140)
-        self.lista_mat_friccion = ["Fundicion de hierro","Metal sinterizado con tambor de acero","Metal sinterizado con tambor de fundicion de hierro",
+        self.lista_mat_friccion = ["Fundición de hierro","Metal sinterizado con tambor de acero","Metal sinterizado con tambor de fundición de hierro",
         "Madera","Cuero","Corcho","Fieltro","Asbesto tejido","Asbesto moldeado","Asbesto impregnado","Grafito de carbono","Cermet","Cuerda de asbesto arrollado",
         "Tira de asbesto tejido","Algodón tejido","Papel resiliente"]
         self.list4 = Combobox(self, width=20, values=self.lista_mat_friccion, state="disabled")
         def Mat(event):
             base_path2 = pathlib.Path(__file__).parent.resolve()
-            nombre_bd = 'Tabla materiales de friccion.db'
+            nombre_bd = resource_path_prymary('images/Tabla materiales de friccion.db')
             dbfile = os.path.join(base_path2, nombre_bd)
             conexion = sqlite3.connect(dbfile)
             cursor = conexion.cursor()
@@ -574,7 +609,7 @@ if __name__ == "__main__":
     root = Tk()
     root.wm_title("Calculos de validacion para frenos y embragues de zapata interna")
     base_path_3rd_part = pathlib.Path(__file__).parent.resolve()
-    image_filename_3rd_part = "images\\Logo ANFRA.ico"
+    image_filename_3rd_part = resource_path_prymary("images\\Logo ANFRA.ico")
     icono = os.path.join(base_path_3rd_part, image_filename_3rd_part)
     root.iconbitmap(icono)
     TemperaturaWindow(root).mainloop()
